@@ -102,6 +102,18 @@ For SQLite, `npm install` compiles the `better-sqlite3` module without the need 
 
 ---
 
+## 🐳 Docker Deployment
+
+Run EidosDB in a container without installing Node.js locally.
+
+```bash
+./deploy.sh
+```
+
+The script builds the Docker image and starts the server on `http://localhost:3000`.
+
+---
+
 ## ⚡ Optional GPU Acceleration
 
 The decay loop can run on the GPU using [GPU.js](https://github.com/gpujs/gpu.js). Install the library and it will be used automatically:
