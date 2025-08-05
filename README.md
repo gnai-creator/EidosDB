@@ -76,7 +76,8 @@ Endpoints include:
 * `GET /query?w=0.003&context=philosophy&tags=time` → Rank by symbolic presence with selectors
 * `POST /tick` → Apply decay cycle
 * `POST /reinforce` → Reinforce an idea
-* `GET /dump` → Dump raw memory
+* `GET /dump` → Dump memory snapshot
+* `POST /restore` → Restore memory from a snapshot
 
 ---
 
