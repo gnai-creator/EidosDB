@@ -1,9 +1,10 @@
-import express from "express";
+import express, { type Request, type Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http"; // Node HTTP server para Express + WebSocket
 import { WebSocketServer } from "ws"; // Servidor WebSocket para streaming
+import type { WebSocket, RawData } from "ws";
 import path from "path"; // Utilizado para servir arquivos estáticos
 import { EidosStore } from "../storage/symbolicStore";
 import { RedisStore } from "../storage/redisStore";
@@ -47,12 +48,12 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Rota para servir o painel de monitoramento em tempo real
-app.get("/dashboard", (_req, res) => {
+app.get("/dashboard", (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "dashboard.html"));
 });
 
 // Rota para consulta por v com seletores simbólicos
-app.get("/query", async (req, res) => {
+app.get("/query", async (req: Request, res: Response) => {
   const w = parseFloat(req.query.w as string);
   if (isNaN(w)) return res.status(400).send("Missing or invalid 'w'");
 
@@ -83,8 +84,8 @@ app.get("/query", async (req, res) => {
 
 // Inserção de novo ponto
 // Permite campo opcional `ttl` (ms) para expirar automaticamente a ideia
-app.post("/insert", async (req, res) => {
-  const data: SemanticIdea = req.body;
+app.post("/insert", async (req: Request<{}, {}, SemanticIdea>, res: Response) => {
+  const data = req.body;
   if (!data.id || typeof data.w !== "number" || typeof data.r !== "number") {
     return res.status(400).send("Invalid DataPoint format");
   }
@@ -95,14 +96,14 @@ app.post("/insert", async (req, res) => {
 });
 
 // Tick de decaimento
-app.post("/tick", async (_req, res) => {
+app.post("/tick", async (_req: Request, res: Response) => {
   await store.tick();
   await logSymbolicMetrics(store);
   res.send("Tick applied");
 });
 
 // Reforço de ponto
-app.post("/reinforce", async (req, res) => {
+app.post("/reinforce", async (req: Request, res: Response) => {
   const { id, factor } = req.body;
   if (!id) return res.status(400).send("Missing 'id'");
   await store.reinforce(id, factor || 1.1);
@@ -111,13 +112,13 @@ app.post("/reinforce", async (req, res) => {
 });
 
 // Dump/Snapshot da memória atual
-app.get("/dump", async (_req, res) => {
+app.get("/dump", async (_req: Request, res: Response) => {
   const snap = await store.snapshot();
   res.json(snap);
 });
 
 // Restaura o estado da memória a partir de um snapshot enviado
-app.post("/restore", async (req, res) => {
+app.post("/restore", async (req: Request, res: Response) => {
   const snapshot: SemanticIdea[] = req.body;
   if (!Array.isArray(snapshot)) {
     return res.status(400).send("Invalid snapshot format");
@@ -127,13 +128,13 @@ app.post("/restore", async (req, res) => {
 });
 
 // Salvar
-app.post("/save", async (_req, res) => {
+app.post("/save", async (_req: Request, res: Response) => {
   await store.save();
   res.send("Saved to disk");
 });
 
 // Carregar
-app.post("/load", async (_req, res) => {
+app.post("/load", async (_req: Request, res: Response) => {
   await store.load();
   res.send("Loaded from disk");
 });
@@ -144,9 +145,9 @@ const server = createServer(app);
 // Servidor WebSocket para reforço baseado em fluxo
 // Clientes enviam mensagens JSON `{ id: string, factor?: number }`
 const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
-wss.on("connection", (socket) => {
+wss.on("connection", (socket: WebSocket) => {
   // Lidar com eventos de reforço de entrada
-  socket.on("message", async (data) => {
+  socket.on("message", async (data: RawData) => {
     try {
       const { id, factor } = JSON.parse(data.toString());
       if (typeof id !== "string") {
@@ -167,7 +168,7 @@ wss.on("connection", (socket) => {
 
 // Servidor WebSocket para envio contínuo de métricas simbólicas
 const metricsWss = new WebSocketServer({ server, path: "/metrics-stream" });
-metricsWss.on("connection", (socket) => {
+metricsWss.on("connection", (socket: WebSocket) => {
   // Função que calcula e envia métricas atuais
   const enviarMetricas = async () => {
     const snapshot = await store.snapshot();
