@@ -2,12 +2,27 @@
 
 import type { DataPoint, EvaluatedPoint } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
+import { saveToDisk, loadFromDisk } from "./persistence";
 
 /**
  * Armazenamento simbólico encapsulado.
  */
 export class EidosStore {
   private memory: DataPoint[] = [];
+
+  /**
+   * Salva os dados atuais em disco.
+   */
+  save(filePath?: string): void {
+    saveToDisk(this.memory, filePath);
+  }
+
+  /**
+   * Carrega dados do disco, substituindo a memória atual.
+   */
+  load(filePath?: string): void {
+    this.memory = loadFromDisk(filePath);
+  }
 
   /**
    * Insere um novo ponto simbólico na memória.

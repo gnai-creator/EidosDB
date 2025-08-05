@@ -11,7 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^24.2.0",
+    "chart.js": "^4.5.0",
+    "chartjs-node-canvas": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/chart.js": "^2.9.41"
   }
 }
