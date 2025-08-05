@@ -42,7 +42,7 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
   Easily insert, query, decay, or reinforce memory via HTTP endpoints like `/insert`, `/query`, `/tick`, `/reinforce`.
 
 * **Approximate Nearest Neighbor (ANN) index**
-  Busca vetores semelhantes de forma acelerada usando hashing sensível à localidade.
+  Accelerated search for similar vectors using locality-sensitive hashing.
 
 * **Lightweight Persistence**
   Default storage is in-memory + JSON file. Alternately supports pluggable store (e.g., Redis, SQLite).
