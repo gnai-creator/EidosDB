@@ -7,18 +7,18 @@ export interface SemanticIdea {
   w: number; // Frequência simbólica (atenção)
   r: number; // Distância simbólica (contexto)
   context: string; // Nome do cluster (ex: "futuro", "medo")
+  timestamp?: number; // Momento de inserção ou ativação
+  relevance?: number; // Importância atribuída manualmente
   metadata?: Record<string, any>; // Emoção, tipo, origem, etc.
 }
 
-// Parâmetros de consulta
 export interface QueryParams {
   w0: number; // Frequência de consulta
-  c?: number; // Valor da constante simbólica (ex: velocidade-limite)
-  label?: string; // Termo a ser embutido semanticamente
-  vector?: number[]; // Vetor já embutido para consulta direta
+  c?: number; // Constante simbólica
+  label?: string; // Termo para embutir semanticamente
+  vector?: number[]; // Vetor semântico direto
 }
 
-// Resultado com cálculo de v
 export interface EvaluatedIdea extends SemanticIdea {
-  v: number; // Presença simbólica calculada
+  v: number; // Presença simbólica (calculada)
 }
