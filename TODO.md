@@ -37,7 +37,7 @@
 - [x] Full unit test suite (Jest)
 - [x] API rate limiting
 - [x] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
-- [ ] Real-time monitoring dashboard
+- [x] Real-time monitoring dashboard
 - [ ] Setup Dockerfile + deployment script
 - [ ] Optional REST-to-GraphQL adapter
 
@@ -61,7 +61,7 @@
 ---
 
 ## 📈 GROWTH / DISTRIBUTION
-- [ ] Public landing page (eidosdb.io or under bittery.org)
+- [ ] Public landing page (eidosdb.com on eidosdb.dev)
 - [ ] App Store/Marketplace listings (e.g. G2, ProductHunt, GitHub Marketplace)
 - [ ] Community: Discord / GitHub Discussions
 - [ ] Publish tutorial video (how it works)
