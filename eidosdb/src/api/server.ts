@@ -1,6 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { createServer } from "http"; // Node HTTP server for Express + WebSocket
+import { WebSocketServer } from "ws"; // WebSocket server for streaming reinforcement
 import { EidosStore } from "../storage/symbolicStore";
 import { RedisStore } from "../storage/redisStore";
 import { SQLiteStore } from "../storage/sqliteStore";
@@ -115,8 +117,35 @@ app.post("/load", async (_req, res) => {
   res.send("Loaded from disk");
 });
 
-// Iniciar servidor
+// HTTP server creation to attach WebSocket alongside Express
+const server = createServer(app);
+
+// WebSocket server for stream-based reinforcement
+// Clients send JSON messages `{ id: string, factor?: number }`
+const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
+wss.on("connection", (socket) => {
+  // Handle incoming reinforcement events
+  socket.on("message", async (data) => {
+    try {
+      const { id, factor } = JSON.parse(data.toString());
+      if (typeof id !== "string") {
+        socket.send(JSON.stringify({ error: "Missing id" }));
+        return;
+      }
+      // Apply reinforcement using provided factor or default
+      await store.reinforce(id, typeof factor === "number" ? factor : 1.1);
+      socket.send(JSON.stringify({ status: "ok" }));
+    } catch (err) {
+      // Notify client of malformed payloads or internal errors
+      socket.send(
+        JSON.stringify({ error: (err as Error).message || "Invalid payload" })
+      );
+    }
+  });
+});
+
+// Start HTTP + WebSocket server
 const PORT = 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🧠 EidosDB API listening on http://localhost:${PORT}`);
 });

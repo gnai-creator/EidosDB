@@ -28,7 +28,7 @@
 - [x] Enable symbolic snapshots (dump + restore states)
 - [x] Implement TTL (time-to-live) or symbolic expiration
 - [x] Export to Redis or SQLite as pluggable storage option
-- [ ] Stream-based reinforcement (via websocket or Kafka)
+- [x] Stream-based reinforcement (via websocket or Kafka)
 - [ ] Optimize decay loop for GPU (optional)
 
 ---
