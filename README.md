@@ -82,9 +82,9 @@ Endpoints include:
 
 ### Storage adapters
 
-Defina a variável `EIDOS_STORAGE` como `memory` (padrão), `redis` ou `sqlite` antes de iniciar o servidor.
-Para usar Redis, instale o pacote e execute um servidor Redis disponível.
-Para SQLite, `npm install` compila o módulo `better-sqlite3` sem necessidade de serviço externo.
+Set the `EIDOS_STORAGE` variable to `memory` (default), `redis`, or `sqlite` before starting the server.
+To use Redis, install the package and run an available Redis server.
+For SQLite, `npm install` compiles the `better-sqlite3` module without the need for an external service.
 
 ---
 
