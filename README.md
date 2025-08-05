@@ -94,11 +94,6 @@ EidosDB is not just a database — it's a **model of symbolic cognition**. It si
 This is an **experimental** and **non-standard** approach to data storage and retrieval.
 It is not optimized for production systems, but rather as a sandbox for symbolic, cognitive or artistic exploration.
 
----
-
-## 📜 License
-
-MIT (for code). Philosophical use encouraged. Commercial use of the concept requires attribution.
 
 ---
 
