@@ -2,18 +2,37 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { EidosStore } from "../storage/symbolicStore";
+import { RedisStore } from "../storage/redisStore";
+import { SQLiteStore } from "../storage/sqliteStore";
+import { MemoryStore } from "../storage/memoryStore";
+import type { StorageAdapter } from "../storage/storageAdapter";
 import type { SemanticIdea } from "../core/symbolicTypes";
 
 const app = express();
-const store = new EidosStore();
-store.load();
-console.log("🧠 Memória simbólica carregada do disco.");
+
+const storageType = process.env.EIDOS_STORAGE || "memory";
+let adapter: StorageAdapter;
+switch (storageType) {
+  case "redis":
+    adapter = new RedisStore();
+    break;
+  case "sqlite":
+    adapter = new SQLiteStore();
+    break;
+  default:
+    adapter = new MemoryStore();
+}
+
+const store = new EidosStore(adapter);
+store.load().then(() =>
+  console.log("🧠 Memória simbólica carregada do disco.")
+);
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // Rota para consulta por v com seletores simbólicos
-app.get("/query", (req, res) => {
+app.get("/query", async (req, res) => {
   const w = parseFloat(req.query.w as string);
   if (isNaN(w)) return res.status(400).send("Missing or invalid 'w'");
 
@@ -38,60 +57,61 @@ app.get("/query", (req, res) => {
     }
   }
 
-  const result = store.query(w, c, { context, tags, metadata });
+  const result = await store.query(w, c, { context, tags, metadata });
   res.json(result);
 });
 
 // Inserção de novo ponto
 // Permite campo opcional `ttl` (ms) para expirar automaticamente a ideia
-app.post("/insert", (req, res) => {
+app.post("/insert", async (req, res) => {
   const data: SemanticIdea = req.body;
   if (!data.id || typeof data.w !== "number" || typeof data.r !== "number") {
     return res.status(400).send("Invalid DataPoint format");
   }
 
-  store.insert(data);
+  await store.insert(data);
   res.sendStatus(201);
 });
 
 // Tick de decaimento
-app.post("/tick", (_req, res) => {
-  store.tick();
+app.post("/tick", async (_req, res) => {
+  await store.tick();
   res.send("Tick applied");
 });
 
 // Reforço de ponto
-app.post("/reinforce", (req, res) => {
+app.post("/reinforce", async (req, res) => {
   const { id, factor } = req.body;
   if (!id) return res.status(400).send("Missing 'id'");
-  store.reinforce(id, factor || 1.1);
+  await store.reinforce(id, factor || 1.1);
   res.send("Reinforced");
 });
 
 // Dump/Snapshot da memória atual
-app.get("/dump", (_req, res) => {
-  res.json(store.snapshot());
+app.get("/dump", async (_req, res) => {
+  const snap = await store.snapshot();
+  res.json(snap);
 });
 
 // Restaura o estado da memória a partir de um snapshot enviado
-app.post("/restore", (req, res) => {
+app.post("/restore", async (req, res) => {
   const snapshot: SemanticIdea[] = req.body;
   if (!Array.isArray(snapshot)) {
     return res.status(400).send("Invalid snapshot format");
   }
-  store.restore(snapshot);
+  await store.restore(snapshot);
   res.send("Snapshot restored");
 });
 
 // Salvar
-app.post("/save", (_req, res) => {
-  store.save();
+app.post("/save", async (_req, res) => {
+  await store.save();
   res.send("Saved to disk");
 });
 
 // Carregar
-app.post("/load", (_req, res) => {
-  store.load();
+app.post("/load", async (_req, res) => {
+  await store.load();
   res.send("Loaded from disk");
 });
 

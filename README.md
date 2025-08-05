@@ -80,6 +80,12 @@ Endpoints include:
 * `GET /dump` → Dump memory snapshot
 * `POST /restore` → Restore memory from a snapshot
 
+### Storage adapters
+
+Defina a variável `EIDOS_STORAGE` como `memory` (padrão), `redis` ou `sqlite` antes de iniciar o servidor.
+Para usar Redis, instale o pacote e execute um servidor Redis disponível.
+Para SQLite, `npm install` compila o módulo `better-sqlite3` sem necessidade de serviço externo.
+
 ---
 
 ## 🧪 Example

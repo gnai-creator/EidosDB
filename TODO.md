@@ -27,7 +27,7 @@
 - [x] Enable symbolic clustering / selectors (filters by context, metadata, tags)
 - [x] Enable symbolic snapshots (dump + restore states)
 - [x] Implement TTL (time-to-live) or symbolic expiration
-- [ ] Export to Redis or SQLite as pluggable storage option
+- [x] Export to Redis or SQLite as pluggable storage option
 - [ ] Stream-based reinforcement (via websocket or Kafka)
 - [ ] Optimize decay loop for GPU (optional)
 
