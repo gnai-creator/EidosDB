@@ -2,15 +2,16 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import { createServer } from "http"; // Node HTTP server for Express + WebSocket
-import { WebSocketServer } from "ws"; // WebSocket server for streaming reinforcement
+import { createServer } from "http"; // Node HTTP server para Express + WebSocket
+import { WebSocketServer } from "ws"; // Servidor WebSocket para streaming
+import path from "path"; // Utilizado para servir arquivos estáticos
 import { EidosStore } from "../storage/symbolicStore";
 import { RedisStore } from "../storage/redisStore";
 import { SQLiteStore } from "../storage/sqliteStore";
 import { MemoryStore } from "../storage/memoryStore";
 import type { StorageAdapter } from "../storage/storageAdapter";
 import type { SemanticIdea } from "../core/symbolicTypes";
-import { logSymbolicMetrics } from "../utils/logger";
+import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 
 const app = express();
 
@@ -44,6 +45,11 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Rota para servir o painel de monitoramento em tempo real
+app.get("/dashboard", (_req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.html"));
+});
 
 // Rota para consulta por v com seletores simbólicos
 app.get("/query", async (req, res) => {
@@ -157,6 +163,22 @@ wss.on("connection", (socket) => {
       );
     }
   });
+});
+
+// Servidor WebSocket para envio contínuo de métricas simbólicas
+const metricsWss = new WebSocketServer({ server, path: "/metrics-stream" });
+metricsWss.on("connection", (socket) => {
+  // Função que calcula e envia métricas atuais
+  const enviarMetricas = async () => {
+    const snapshot = await store.snapshot();
+    const metrics = computeSymbolicMetrics(snapshot);
+    socket.send(JSON.stringify(metrics));
+  };
+  // Envio inicial imediato
+  enviarMetricas();
+  // Intervalo para envio periódico das métricas
+  const interval = setInterval(enviarMetricas, 1000);
+  socket.on("close", () => clearInterval(interval));
 });
 
 // Start HTTP + WebSocket server

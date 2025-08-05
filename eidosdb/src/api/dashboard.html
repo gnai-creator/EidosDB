@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EidosDB Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>EidosDB Metrics</h1>
+  <p id="cluster">Cluster Dominante: -</p>
+  <canvas id="chart" width="600" height="300"></canvas>
+  <script>
+    // Conecta ao servidor WebSocket para receber métricas em tempo real
+    const socket = new WebSocket('ws://localhost:3000/metrics-stream');
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    // Configuração do gráfico de linha para acompanhar o valor médio de v
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'v médio',
+          data: [],
+          borderColor: 'rgba(75,192,192,1)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        animation: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Leituras'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'v'
+            }
+          }
+        }
+      }
+    });
+
+    socket.addEventListener('message', (event) => {
+      // Atualiza o gráfico e o texto com as métricas recebidas
+      const metrics = JSON.parse(event.data);
+      document.getElementById('cluster').textContent = 'Cluster Dominante: ' + (metrics.dominantCluster || '-');
+      chart.data.labels.push('');
+      chart.data.datasets[0].data.push(metrics.averageV);
+      chart.update();
+    });
+  </script>
+</body>
+</html>
