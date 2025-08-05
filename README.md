@@ -41,6 +41,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **REST API Interface**
   Easily insert, query, decay, or reinforce memory via HTTP endpoints like `/insert`, `/query`, `/tick`, `/reinforce`.
 
+* **WebSocket reinforcement stream**
+  Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
+
 * **Approximate Nearest Neighbor (ANN) index**
   Accelerated search for similar vectors using locality-sensitive hashing.
 
@@ -77,6 +80,7 @@ Endpoints include:
 * `GET /query?w=0.003&context=philosophy&tags=time` → Rank by symbolic presence with selectors
 * `POST /tick` → Apply decay cycle
 * `POST /reinforce` → Reinforce an idea
+* `WS ws://localhost:3000/reinforce-stream` → Stream reinforcement events in JSON
 * `GET /dump` → Dump memory snapshot
 * `POST /restore` → Restore memory from a snapshot
 
