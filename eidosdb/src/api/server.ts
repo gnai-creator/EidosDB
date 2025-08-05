@@ -12,42 +12,34 @@ console.log("🧠 Memória simbólica carregada do disco.");
 app.use(cors());
 app.use(bodyParser.json());
 
-// Rota para consulta por v
+// Rota para consulta por v com seletores simbólicos
 app.get("/query", (req, res) => {
   const w = parseFloat(req.query.w as string);
   if (isNaN(w)) return res.status(400).send("Missing or invalid 'w'");
 
-  const result = store.query(w);
+  const c = req.query.c ? parseFloat(req.query.c as string) : undefined;
+  const context = req.query.context as string | undefined;
+
+  const tagsParam = req.query.tags as string | undefined;
+  const tags = tagsParam
+    ? tagsParam
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0)
+    : undefined;
+
+  const metadataParam = req.query.metadata as string | undefined;
+  let metadata: Record<string, any> | undefined;
+  if (metadataParam) {
+    try {
+      metadata = JSON.parse(metadataParam);
+    } catch {
+      return res.status(400).send("Invalid 'metadata' JSON");
+    }
+  }
+
+  const result = store.query(w, c, { context, tags, metadata });
   res.json(result);
-});
-
-// Rota simbólica com filtro por metadata
-app.get("/query-simbolica", (req, res) => {
-  const w = parseFloat(req.query.w as string);
-  if (isNaN(w)) return res.status(400).send("Missing or invalid 'w'");
-
-  // Extração dos filtros opcionais
-  const filtroTipo = req.query.tipo as string | undefined;
-  const filtroEmocao = req.query.emoção as string | undefined;
-  const filtroOrigem = req.query.origem as string | undefined;
-  const filtroRelacao = req.query.relação as string | undefined;
-
-  // Avaliar e ordenar por v
-  const avaliados = store.query(w);
-
-  // Aplicar filtros simbólicos
-  const filtrados = avaliados.filter((p) => {
-    const m = p.metadata ?? {};
-
-    if (filtroTipo && m.tipo !== filtroTipo) return false;
-    if (filtroOrigem && m.origem !== filtroOrigem) return false;
-    if (filtroEmocao && !m.emoções?.includes(filtroEmocao)) return false;
-    if (filtroRelacao && !m.relações?.includes(filtroRelacao)) return false;
-
-    return true;
-  });
-
-  res.json(filtrados);
 });
 
 // Inserção de novo ponto

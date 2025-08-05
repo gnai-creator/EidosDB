@@ -19,8 +19,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 
   * a semantic embedding (vector),
   * a symbolic frequency (`w`),
-  * a symbolic distance (`r`),
-  * and contextual metadata (e.g., emotion, origin, type).
+ * a symbolic distance (`r`),
+  * contextual metadata (e.g., emotion, origin, type),
+  * and optional tags for symbolic grouping.
 
 * **Physics-Inspired Presence Formula**
 
@@ -72,7 +73,7 @@ EidosDB is ideal for:
 Endpoints include:
 
 * `POST /insert` → Insert an idea
-* `GET /query?w=0.003` → Rank by symbolic presence
+* `GET /query?w=0.003&context=philosophy&tags=time` → Rank by symbolic presence with selectors
 * `POST /tick` → Apply decay cycle
 * `POST /reinforce` → Reinforce an idea
 * `GET /dump` → Dump raw memory
@@ -89,18 +90,19 @@ const idea: SemanticIdea = {
   w: 0.002,
   r: 2000,
   context: "philosophy",
-  metadata: { emotion: "wonder", origin: "thought experiment" }
+  metadata: { emotion: "wonder", origin: "thought experiment" },
+  tags: ["time", "concept"],
 };
 await api.post('/insert', idea);
 ```
 
-To query memory presence:
+To query memory presence with selectors:
 
 ```bash
-GET /query?w=0.003
+GET /query?w=0.003&context=philosophy&tags=time
 ```
 
-Returns a list of ideas sorted by `v` — the higher the `v`, the more present the idea is right now.
+Returns a list of ideas sorted by `v` — the higher the `v`, the more present the idea is right now and matching the provided filters.
 
 ---
 

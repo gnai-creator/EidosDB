@@ -1,6 +1,6 @@
 // src/storage/symbolicStore.ts
 
-import type { SemanticIdea } from "../core/symbolicTypes";
+import type { SemanticIdea, QuerySelectors } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
 import { saveToDisk, loadFromDisk } from "./persistence";
 
@@ -55,8 +55,34 @@ export class EidosStore {
   /**
    * Retorna as ideias avaliadas e ordenadas por v (desc).
    */
-  query(w: number, c: number = DEFAULT_C): (SemanticIdea & { v: number })[] {
+  query(
+    w: number,
+    c: number = DEFAULT_C,
+    selectors: QuerySelectors = {}
+  ): (SemanticIdea & { v: number })[] {
     return this.memory
+      .filter((idea) => {
+        if (selectors.context && idea.context !== selectors.context) return false;
+
+        if (selectors.tags && selectors.tags.length > 0) {
+          if (!idea.tags) return false;
+          if (!selectors.tags.every((tag) => idea.tags!.includes(tag))) return false;
+        }
+
+        if (selectors.metadata) {
+          for (const [key, value] of Object.entries(selectors.metadata)) {
+            const ideaVal = idea.metadata?.[key];
+            if (Array.isArray(value)) {
+              if (!Array.isArray(ideaVal)) return false;
+              if (!value.every((v) => (ideaVal as any[]).includes(v))) return false;
+            } else {
+              if (ideaVal !== value) return false;
+            }
+          }
+        }
+
+        return true;
+      })
       .map((idea) => ({
         ...idea,
         v: calculateV(w, idea.r, c),
