@@ -16,7 +16,7 @@
 - [x] Whitepaper (EN/PT)
 - [x] Pitch deck outline
 - [x] GitHub repo & basic docs
-- [x] Symbolic license
+- [x] License
 - [x] ResearchGate submission (in progress)
 
 ---
