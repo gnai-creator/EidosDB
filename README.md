@@ -44,6 +44,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **WebSocket reinforcement stream**
   Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
 
+* **Real-time monitoring dashboard**
+  Observe symbolic metrics live at `http://localhost:3000/dashboard`.
+
 * **API rate limiting**
   Requests are capped at 100 per minute per IP to prevent abuse.
 
@@ -79,6 +82,7 @@ EidosDB is ideal for:
    npx ts-node src/api/server.ts
    ```
 4. Access API on [http://localhost:3000](http://localhost:3000)
+5. Open the real-time dashboard at [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 Endpoints include:
 
