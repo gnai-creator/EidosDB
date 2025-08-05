@@ -8,7 +8,6 @@ export interface SemanticIdea {
   r: number; // Distância simbólica (contexto)
   context: string; // Nome do cluster (ex: "futuro", "medo")
   timestamp?: number; // Momento de inserção ou ativação
-  relevance?: number; // Importância atribuída manualmente
   metadata?: Record<string, any>; // Emoção, tipo, origem, etc.
 }
 
