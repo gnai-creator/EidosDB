@@ -1,11 +1,12 @@
 // src/semantic/semanticSearch.ts
 import { SemanticIdea } from "../core/symbolicTypes";
-import { cosineSimilarity } from "./similarity";
+import { vectorSimilarity } from "./similarity";
 import { AnnIndex } from "./annIndex";
 
 /**
- * Busca exata de vizinhos mais próximos utilizando similaridade de cosseno.
- * Útil para conjuntos pequenos de vetores.
+ * Busca exata de vizinhos mais próximos utilizando similaridade vetorial
+ * (cosseno com fallback para dot product). Útil para conjuntos pequenos
+ * de vetores.
  */
 export function findNearestIdeas(
   ideas: SemanticIdea[],
@@ -15,7 +16,7 @@ export function findNearestIdeas(
   return ideas
     .map((idea) => ({
       idea,
-      score: cosineSimilarity(idea.vector, queryVector),
+      score: vectorSimilarity(idea.vector, queryVector),
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)

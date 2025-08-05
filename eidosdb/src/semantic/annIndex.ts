@@ -1,6 +1,6 @@
 // src/semantic/annIndex.ts
 import { SemanticIdea } from "../core/symbolicTypes";
-import { cosineSimilarity } from "./similarity";
+import { vectorSimilarity } from "./similarity";
 
 /**
  * Índice de vizinhança aproximada baseado em LSH (Locality Sensitive Hashing).
@@ -50,7 +50,8 @@ export class AnnIndex {
 
   /**
    * Consulta aproximada: busca candidatos nos buckets correspondentes
-   * e avalia apenas esse subconjunto com similaridade de cosseno.
+   * e avalia apenas esse subconjunto com similaridade vetorial
+   * (cosseno com fallback para dot product).
    */
   query(queryVector: number[], topK = 5): SemanticIdea[] {
     const candidates = new Set<SemanticIdea>();
@@ -65,7 +66,7 @@ export class AnnIndex {
     return list
       .map((idea) => ({
         idea,
-        score: cosineSimilarity(idea.vector, queryVector),
+        score: vectorSimilarity(idea.vector, queryVector),
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK)
