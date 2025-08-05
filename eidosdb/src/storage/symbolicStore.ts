@@ -108,9 +108,26 @@ export class EidosStore {
   }
 
   /**
+   * Cria um snapshot profundo da memória atual.
+   * Retorna uma cópia independente para evitar mutações externas.
+   */
+  snapshot(): SemanticIdea[] {
+    return this.memory.map((idea) => ({ ...idea }));
+  }
+
+  /**
+   * Restaura o estado da memória a partir de um snapshot.
+   * Todo conteúdo existente é substituído pelo snapshot fornecido.
+   */
+  restore(snapshot: SemanticIdea[]): void {
+    this.memory = snapshot.map((idea) => ({ ...idea }));
+  }
+
+  /**
    * Retorna todas as ideias sem avaliação (estado bruto).
+   * Mantido como alias para `snapshot()` por compatibilidade.
    */
   dump(): SemanticIdea[] {
-    return [...this.memory];
+    return this.snapshot();
   }
 }

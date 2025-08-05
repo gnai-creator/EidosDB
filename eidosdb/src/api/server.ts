@@ -67,9 +67,19 @@ app.post("/reinforce", (req, res) => {
   res.send("Reinforced");
 });
 
-// Dump da memória
+// Dump/Snapshot da memória atual
 app.get("/dump", (_req, res) => {
-  res.json(store.dump());
+  res.json(store.snapshot());
+});
+
+// Restaura o estado da memória a partir de um snapshot enviado
+app.post("/restore", (req, res) => {
+  const snapshot: SemanticIdea[] = req.body;
+  if (!Array.isArray(snapshot)) {
+    return res.status(400).send("Invalid snapshot format");
+  }
+  store.restore(snapshot);
+  res.send("Snapshot restored");
 });
 
 // Salvar
