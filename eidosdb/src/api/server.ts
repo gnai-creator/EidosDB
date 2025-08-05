@@ -26,9 +26,9 @@ switch (storageType) {
 }
 
 const store = new EidosStore(adapter);
-store.load().then(() =>
-  console.log("🧠 Memória simbólica carregada do disco.")
-);
+store
+  .load()
+  .then(() => console.log("🧠 Memória simbólica carregada do disco."));
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -117,14 +117,14 @@ app.post("/load", async (_req, res) => {
   res.send("Loaded from disk");
 });
 
-// HTTP server creation to attach WebSocket alongside Express
+//Criação de servidor HTTP para anexar WebSocket ao Express
 const server = createServer(app);
 
-// WebSocket server for stream-based reinforcement
-// Clients send JSON messages `{ id: string, factor?: number }`
+// Servidor WebSocket para reforço baseado em fluxo
+// Clientes enviam mensagens JSON `{ id: string, factor?: number }`
 const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
 wss.on("connection", (socket) => {
-  // Handle incoming reinforcement events
+  // Lidar com eventos de reforço de entrada
   socket.on("message", async (data) => {
     try {
       const { id, factor } = JSON.parse(data.toString());
@@ -132,11 +132,11 @@ wss.on("connection", (socket) => {
         socket.send(JSON.stringify({ error: "Missing id" }));
         return;
       }
-      // Apply reinforcement using provided factor or default
+      // Aplicar reforço usando fator fornecido ou padrão
       await store.reinforce(id, typeof factor === "number" ? factor : 1.1);
       socket.send(JSON.stringify({ status: "ok" }));
     } catch (err) {
-      // Notify client of malformed payloads or internal errors
+      // Notificar o cliente sobre cargas malformadas ou erros internos
       socket.send(
         JSON.stringify({ error: (err as Error).message || "Invalid payload" })
       );
