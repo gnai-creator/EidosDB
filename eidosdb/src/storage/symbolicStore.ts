@@ -1,7 +1,7 @@
 // src/storage/symbolicStore.ts
 
-import type { DataPoint, EvaluatedPoint } from "../core/symbolicTypes.js";
-import { calculateV, DEFAULT_C } from "../core/formula.js";
+import type { DataPoint, EvaluatedPoint } from "../core/symbolicTypes";
+import { calculateV, DEFAULT_C } from "../core/formula";
 
 /**
  * Armazenamento simbólico encapsulado.
