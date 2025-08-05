@@ -1,56 +1,136 @@
 // src/storage/memoryStore.ts
 
-import { SemanticIdea } from "../core/symbolicTypes";
+import type { SemanticIdea, QuerySelectors } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
+import { saveToDisk, loadFromDisk } from "./persistence";
+import type { StorageAdapter } from "./storageAdapter";
 
 /**
- * Armazenamento em memória dos dados simbólicos com vetor.
+ * Armazenamento simbólico em memória.
  */
-const ideaStore: SemanticIdea[] = [];
+export class MemoryStore implements StorageAdapter {
+  private memory: SemanticIdea[] = [];
+  private readonly decayFactor: number = 0.95; // 5% de perda por tick
+  private readonly minW: number = 1e-6; // Valor mínimo simbólico
 
-/**
- * Remove ideias expiradas baseadas em timestamp + ttl.
- */
-function cleanupExpired() {
-  const now = Date.now();
-  for (let i = ideaStore.length - 1; i >= 0; i--) {
-    const idea = ideaStore[i];
-    if (idea.ttl && idea.timestamp && idea.timestamp + idea.ttl <= now) {
-      ideaStore.splice(i, 1);
-    }
+  /**
+   * Remove ideias expiradas baseadas em timestamp + ttl.
+   */
+  private cleanupExpired(): void {
+    const now = Date.now();
+    this.memory = this.memory.filter((idea) => {
+      if (idea.ttl === undefined || idea.timestamp === undefined) return true;
+      return idea.timestamp + idea.ttl > now;
+    });
   }
-}
 
-/**
- * Insere uma nova ideia simbólica no banco.
- */
-export function insertIdea(idea: SemanticIdea): void {
-  cleanupExpired();
-  if (!idea.timestamp) {
-    idea.timestamp = Date.now();
-  }
-  ideaStore.push(idea);
-}
-
-/**
- * Consulta as ideias ordenadas por v (descendente) com base em w de consulta.
- */
-export function queryIdeasByW(
-  w: number,
-  c: number = DEFAULT_C
-): (SemanticIdea & { v: number })[] {
-  cleanupExpired();
-  return ideaStore
-    .map((idea) => ({
+  /**
+   * Aplica decaimento simbólico em todos os pontos da memória.
+   */
+  async tick(): Promise<void> {
+    this.cleanupExpired();
+    this.memory = this.memory.map((idea) => ({
       ...idea,
-      v: calculateV(w, idea.r, c),
-    }))
-    .sort((a, b) => b.v - a.v);
-}
+      w: Math.max(idea.w * this.decayFactor, this.minW),
+    }));
+  }
 
-/**
- * Limpa todas as ideias da memória (útil para testes).
- */
-export function clearMemory(): void {
-  ideaStore.length = 0;
+  /**
+   * Reestimula uma ideia simbólica, mantendo-a viva.
+   */
+  async reinforce(id: string, factor: number = 1.1): Promise<void> {
+    this.cleanupExpired();
+    this.memory = this.memory.map((idea) =>
+      idea.id === id ? { ...idea, w: idea.w * factor } : idea
+    );
+  }
+
+  /**
+   * Salva os dados atuais em disco.
+   */
+  async save(filePath?: string): Promise<void> {
+    this.cleanupExpired();
+    saveToDisk(this.memory, filePath);
+  }
+
+  /**
+   * Carrega dados do disco, substituindo a memória atual.
+   */
+  async load(filePath?: string): Promise<void> {
+    this.memory = loadFromDisk(filePath);
+    this.cleanupExpired();
+  }
+
+  /**
+   * Insere uma nova ideia simbólica na memória.
+   */
+  async insert(idea: SemanticIdea): Promise<void> {
+    this.cleanupExpired();
+    if (!idea.timestamp) {
+      idea.timestamp = Date.now();
+    }
+    this.memory.push(idea);
+  }
+
+  /**
+   * Retorna as ideias avaliadas e ordenadas por v (desc).
+   */
+  async query(
+    w: number,
+    c: number = DEFAULT_C,
+    selectors: QuerySelectors = {}
+  ): Promise<(SemanticIdea & { v: number })[]> {
+    this.cleanupExpired();
+    return this.memory
+      .filter((idea) => {
+        if (selectors.context && idea.context !== selectors.context) return false;
+
+        if (selectors.tags && selectors.tags.length > 0) {
+          if (!idea.tags) return false;
+          if (!selectors.tags.every((tag) => idea.tags!.includes(tag))) return false;
+        }
+
+        if (selectors.metadata) {
+          for (const [key, value] of Object.entries(selectors.metadata)) {
+            const ideaVal = idea.metadata?.[key];
+            if (Array.isArray(value)) {
+              if (!Array.isArray(ideaVal)) return false;
+              if (!value.every((v) => (ideaVal as any[]).includes(v))) return false;
+            } else {
+              if (ideaVal !== value) return false;
+            }
+          }
+        }
+
+        return true;
+      })
+      .map((idea) => ({
+        ...idea,
+        v: calculateV(w, idea.r, c),
+      }))
+      .sort((a, b) => b.v - a.v);
+  }
+
+  /**
+   * Limpa a memória simbólica.
+   */
+  async clear(): Promise<void> {
+    this.memory.length = 0;
+  }
+
+  /**
+   * Cria um snapshot profundo da memória atual.
+   */
+  async snapshot(): Promise<SemanticIdea[]> {
+    this.cleanupExpired();
+    return this.memory.map((idea) => ({ ...idea }));
+  }
+
+  /**
+   * Restaura o estado da memória a partir de um snapshot.
+   */
+  async restore(snapshot: SemanticIdea[]): Promise<void> {
+    this.memory = snapshot.map((idea) => ({ ...idea }));
+    this.cleanupExpired();
+  }
 }

@@ -18,12 +18,15 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "redis": "^5.8.0",
+    "better-sqlite3": "^12.2.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.6",
     "@types/chart.js": "^2.9.41",
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3"
+    "@types/express": "^5.0.3",
+    "@types/better-sqlite3": "^7.6.13"
   }
 }
