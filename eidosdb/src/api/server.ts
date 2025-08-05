@@ -10,6 +10,7 @@ import { SQLiteStore } from "../storage/sqliteStore";
 import { MemoryStore } from "../storage/memoryStore";
 import type { StorageAdapter } from "../storage/storageAdapter";
 import type { SemanticIdea } from "../core/symbolicTypes";
+import { logSymbolicMetrics } from "../utils/logger";
 
 const app = express();
 
@@ -83,12 +84,14 @@ app.post("/insert", async (req, res) => {
   }
 
   await store.insert(data);
+  await logSymbolicMetrics(store);
   res.sendStatus(201);
 });
 
 // Tick de decaimento
 app.post("/tick", async (_req, res) => {
   await store.tick();
+  await logSymbolicMetrics(store);
   res.send("Tick applied");
 });
 
@@ -97,6 +100,7 @@ app.post("/reinforce", async (req, res) => {
   const { id, factor } = req.body;
   if (!id) return res.status(400).send("Missing 'id'");
   await store.reinforce(id, factor || 1.1);
+  await logSymbolicMetrics(store);
   res.send("Reinforced");
 });
 
