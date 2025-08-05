@@ -38,7 +38,7 @@
 - [x] API rate limiting
 - [x] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
 - [x] Real-time monitoring dashboard
-- [ ] Setup Dockerfile + deployment script
+- [x] Setup Dockerfile + deployment script
 - [ ] Optional REST-to-GraphQL adapter
 
 ---
