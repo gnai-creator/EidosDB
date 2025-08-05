@@ -43,7 +43,7 @@ The closer a data-point is to `wr ≈ c`, the more "present" it becomes — yet 
 > Future versions may support Python or Rust backends.
 
 ```bash
-git clone https://github.com/your-username/eidosdb.git
+git clone https://github.com/gnai-creator/eidosdb.git
 cd eidosdb
 npm install
 ```
