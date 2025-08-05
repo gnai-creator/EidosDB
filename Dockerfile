@@ -1,0 +1,20 @@
+# Imagem base com Node.js
+FROM node:18-alpine
+
+# Definir diretório de trabalho dentro do contêiner
+WORKDIR /app
+
+# Copiar arquivos de dependências para otimizar o cache de build
+COPY eidosdb/package*.json ./
+
+# Instalar dependências sem pacotes de desenvolvimento
+RUN npm ci --omit=dev
+
+# Copiar o restante do código da aplicação
+COPY eidosdb/ .
+
+# Expor a porta utilizada pela API
+EXPOSE 3000
+
+# Comando padrão para iniciar o servidor
+CMD ["npm", "run", "start:api"]
