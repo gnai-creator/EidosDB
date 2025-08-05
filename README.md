@@ -1,71 +1,129 @@
-# 🧬 EidosDB
+# EidosDB
 
-EidosDB is an experimental symbolic database implemented in TypeScript. It evaluates the relevance of stored concepts using a relativistic-inspired access formula.
+**EidosDB** — *The Symbolic Memory Engine for Next‑Gen AI*
 
-## ✨ Features
+---
 
-- Relativistic access function `calculateV` for ranking data by frequency and distance
-- In-memory `EidosStore` with optional persistence to disk
-- REST API for inserting, querying and evolving memory
-- Written in TypeScript with **ts-node** for rapid prototyping
+## 🌟 What is EidosDB?
 
-## 🚀 Getting Started
+EidosDB is a novel memory engine that combines symbolic reasoning with semantic embeddings and temporal dynamics. Instead of merely storing data, it treats each idea as a living entity that *remembers, decays, and adapts* based on use.
 
-### Requirements
+Think of it as a **cognitive layer**—a memory that fades, reinforces, and ranks thoughts based on context and intensity.
 
-- Node.js 18+
-- npm
+---
 
-### Installation
+## 🔍 Key Features
 
-```bash
-git clone https://github.com/gnai-creator/EidosDB.git
-cd EidosDB/eidosdb
-npm install
-```
+* **Hybrid Symbolic Semantic Model**
+  Every stored idea has:
 
-### Running the API
+  * a semantic embedding (vector),
+  * a symbolic frequency (`w`),
+  * a symbolic distance (`r`),
+  * and contextual metadata (e.g., emotion, origin, type).
 
-```bash
-npm run start:api
-# API available at http://localhost:3000
-```
+* **Physics-Inspired Presence Formula**
 
-### Using the Core Formula
+  ```ts
+  v = (4 * w * r) / (π * √(1 − (w * r / c)²))
+  ```
+
+  This formula creates a “velocity-like” symbolic presence score (`v`) inspired by relativity.
+
+* **Memory Behavior**
+
+  * **Decay over time** (`tick()` lowers `w`)
+  * **Reinforcement** (`reinforce(id)`) to boost an idea
+  * **Context-based filtering** and search
+
+* **REST API Interface**
+  Easily insert, query, decay, or reinforce memory via HTTP endpoints like `/insert`, `/query`, `/tick`, `/reinforce`.
+
+* **Lightweight Persistence**
+  Default storage is in-memory + JSON file. Alternately supports pluggable store (e.g., Redis, SQLite).
+
+---
+
+## 🧠 Why It Matters
+
+EidosDB is ideal for:
+
+* **AI agents with symbolic memory**: NPCs, chatbots, interactive systems that need long-term idea tracking.
+* **Research in symbolic reasoning**: studies on decay, attention dynamics, and memory structures.
+* **Personal knowledge systems**: evolving notes, thematic reminders, idea networks.
+* **AGI prototypes**: symbolic-semantic hybrid cognition engines.
+
+---
+
+## 📦 Quickstart
+
+1. Clone the repository
+2. Run `npm install`
+3. Execute the server:
+
+   ```bash
+   npx ts-node src/api/server.ts
+   ```
+4. Access API on [http://localhost:3000](http://localhost:3000)
+
+Endpoints include:
+
+* `POST /insert` → Insert an idea
+* `GET /query?w=0.003` → Rank by symbolic presence
+* `POST /tick` → Apply decay cycle
+* `POST /reinforce` → Reinforce an idea
+* `GET /dump` → Dump raw memory
+
+---
+
+## 🧪 Example
 
 ```ts
-import { calculateV } from "./src/core/formula";
-
-const v = calculateV(0.04, 3500);
-// v is the effective access velocity
+const idea: SemanticIdea = {
+  id: "alpha",
+  label: "time is illusion",
+  vector: [/* semantically generated */],
+  w: 0.002,
+  r: 2000,
+  context: "philosophy",
+  metadata: { emotion: "wonder", origin: "thought experiment" }
+};
+await api.post('/insert', idea);
 ```
 
-## 📁 Project Structure
+To query memory presence:
 
-```
-eidosdb/
-├── src/
-│   ├── api/        # Express server exposing the REST interface
-│   ├── core/       # Relativistic formula and symbolic types
-│   ├── storage/    # In-memory store and persistence helpers
-│   ├── semantic/   # Experimental semantic helpers
-│   └── utils/      # General utilities
-└── data/          # Example dataset
+```bash
+GET /query?w=0.003
 ```
 
-## 🛣️ Roadmap
+Returns a list of ideas sorted by `v` — the higher the `v`, the more present the idea is right now.
 
-- [x] Define core relativistic access function
-- [ ] Persist symbolic data and rank entries by `v`
-- [ ] Implement decay and reinforcement mechanisms
-- [ ] Expose CLI and web dashboard
-- [ ] Create comprehensive test suite
+---
 
-## ⚠️ Disclaimer
+## 🧭 Roadmap & Contributions
 
-EidosDB is a research and artistic prototype. It is **not** ready for production use.
+We have a roadmap for enhancing EidosDB including:
 
-## 🧠 Author
+* Integration with real semantic models for generating `vector`s
+* Approximate Nearest Neighbor (ANN) acceleration for fast search
+* Symbolic clustering, TTL/expiration, context-aware snapshots
+* GUI dashboard, real-time reinforcement streams, and more
 
-Felipe Muniz • [gnai-creator](https://github.com/gnai-creator)
+We welcome contributors! See the `TODO.md` for high-level tasks and issue ideas.
 
+---
+
+## 📧 Contact & License
+
+**Author**: Felipe Muniz – 2025
+**License**: Custom symbolic (non-commercial research).
+Feel free to contribute or reach out via GitHub or email if you're interested in collaboration.
+
+---
+
+## 🚀 In Summary
+
+EidosDB is **not just a database**—it’s a **memory engine for symbolic intelligence**. It models ideas as entities that *live, fade, and grow* within their context—opening new possibilities in cognitive AI and knowledge modeling.
+
+Try it, experiment, and join the symbolic memory movement!
