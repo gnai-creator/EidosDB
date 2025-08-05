@@ -26,7 +26,7 @@
 - [x] Implement vector similarity fallback (cosine or dot-product)
 - [x] Enable symbolic clustering / selectors (filters by context, metadata, tags)
 - [x] Enable symbolic snapshots (dump + restore states)
-- [ ] Implement TTL (time-to-live) or symbolic expiration
+- [x] Implement TTL (time-to-live) or symbolic expiration
 - [ ] Export to Redis or SQLite as pluggable storage option
 - [ ] Stream-based reinforcement (via websocket or Kafka)
 - [ ] Optimize decay loop for GPU (optional)

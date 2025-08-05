@@ -43,6 +43,7 @@ app.get("/query", (req, res) => {
 });
 
 // Inserção de novo ponto
+// Permite campo opcional `ttl` (ms) para expirar automaticamente a ideia
 app.post("/insert", (req, res) => {
   const data: SemanticIdea = req.body;
   if (!data.id || typeof data.w !== "number" || typeof data.r !== "number") {
