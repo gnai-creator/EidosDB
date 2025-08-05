@@ -39,6 +39,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **REST API Interface**
   Easily insert, query, decay, or reinforce memory via HTTP endpoints like `/insert`, `/query`, `/tick`, `/reinforce`.
 
+* **Approximate Nearest Neighbor (ANN) index**
+  Busca vetores semelhantes de forma acelerada usando hashing sensível à localidade.
+
 * **Lightweight Persistence**
   Default storage is in-memory + JSON file. Alternately supports pluggable store (e.g., Redis, SQLite).
 
@@ -106,7 +109,6 @@ Returns a list of ideas sorted by `v` — the higher the `v`, the more present t
 We have a roadmap for enhancing EidosDB including:
 
 * Integration with real semantic models for generating `vector`s
-* Approximate Nearest Neighbor (ANN) acceleration for fast search
 * Symbolic clustering, TTL/expiration, context-aware snapshots
 * GUI dashboard, real-time reinforcement streams, and more
 
