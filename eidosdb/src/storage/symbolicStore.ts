@@ -1,6 +1,6 @@
 // src/storage/symbolicStore.ts
 
-import type { DataPoint, EvaluatedPoint } from "../core/symbolicTypes";
+import type { SemanticIdea } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
 import { saveToDisk, loadFromDisk } from "./persistence";
 
@@ -8,7 +8,7 @@ import { saveToDisk, loadFromDisk } from "./persistence";
  * Armazenamento simbólico encapsulado.
  */
 export class EidosStore {
-  private memory: DataPoint[] = [];
+  private memory: SemanticIdea[] = [];
   private readonly decayFactor: number = 0.95; // 5% de perda por tick
   private readonly minW: number = 1e-6; // Valor mínimo simbólico
 
@@ -16,18 +16,18 @@ export class EidosStore {
    * Aplica decaimento simbólico em todos os pontos da memória.
    */
   tick(): void {
-    this.memory = this.memory.map((point) => ({
-      ...point,
-      w: Math.max(point.w * this.decayFactor, this.minW),
+    this.memory = this.memory.map((idea) => ({
+      ...idea,
+      w: Math.max(idea.w * this.decayFactor, this.minW),
     }));
   }
 
   /**
-   * Reestimula um ponto da memória, mantendo-o “vivo”.
+   * Reestimula uma ideia simbólica, mantendo-a “viva”.
    */
   reinforce(id: string, factor: number = 1.1): void {
-    this.memory = this.memory.map((point) =>
-      point.id === id ? { ...point, w: point.w * factor } : point
+    this.memory = this.memory.map((idea) =>
+      idea.id === id ? { ...idea, w: idea.w * factor } : idea
     );
   }
 
@@ -46,31 +46,31 @@ export class EidosStore {
   }
 
   /**
-   * Insere um novo ponto simbólico na memória.
+   * Insere uma nova ideia simbólica na memória.
    */
-  insert(point: DataPoint): void {
-    this.memory.push(point);
+  insert(idea: SemanticIdea): void {
+    this.memory.push(idea);
   }
 
   /**
-   * Retorna os pontos avaliados e ordenados por v (decrescente).
+   * Retorna as ideias avaliadas e ordenadas por v (desc).
    */
-  query(w: number, c: number = DEFAULT_C): EvaluatedPoint[] {
+  query(w: number, c: number = DEFAULT_C): (SemanticIdea & { v: number })[] {
     return this.memory
-      .map((point) => ({
-        ...point,
-        v: calculateV(w, point.r, c),
+      .map((idea) => ({
+        ...idea,
+        v: calculateV(w, idea.r, c),
       }))
       .sort((a, b) => b.v - a.v);
   }
 
   /**
-   * Retorna apenas o ponto mais “presente” simbolicamente.
+   * Retorna apenas a ideia mais “presente” simbolicamente.
    */
   getMostRelevant(
     w: number,
     c: number = DEFAULT_C
-  ): EvaluatedPoint | undefined {
+  ): (SemanticIdea & { v: number }) | undefined {
     return this.query(w, c)[0];
   }
 
@@ -82,9 +82,9 @@ export class EidosStore {
   }
 
   /**
-   * Retorna todos os pontos crus (sem avaliar).
+   * Retorna todas as ideias sem avaliação (estado bruto).
    */
-  dump(): DataPoint[] {
+  dump(): SemanticIdea[] {
     return [...this.memory];
   }
 }

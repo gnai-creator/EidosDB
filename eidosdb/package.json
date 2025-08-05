@@ -4,19 +4,26 @@
   "description": "A relativistic symbolic database for spatial-temporal access and conceptual memory.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:api": "ts-node src/api/server.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^24.2.0",
+    "body-parser": "^2.2.0",
     "chart.js": "^4.5.0",
     "chartjs-node-canvas": "^5.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
   "devDependencies": {
-    "@types/chart.js": "^2.9.41"
+    "@types/body-parser": "^1.19.6",
+    "@types/chart.js": "^2.9.41",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3"
   }
 }

@@ -1,38 +1,38 @@
 // src/storage/memoryStore.ts
 
-import type { DataPoint, EvaluatedPoint } from "../core/symbolicTypes";
+import { SemanticIdea } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
 
 /**
- * Armazenamento em memória dos dados simbólicos.
+ * Armazenamento em memória dos dados simbólicos com vetor.
  */
-const dataPoints: DataPoint[] = [];
+const ideaStore: SemanticIdea[] = [];
 
 /**
- * Insere um novo ponto simbólico no banco.
+ * Insere uma nova ideia simbólica no banco.
  */
-export function insertDataPoint(point: DataPoint): void {
-  dataPoints.push(point);
+export function insertIdea(idea: SemanticIdea): void {
+  ideaStore.push(idea);
 }
 
 /**
- * Retorna os dados avaliados e ordenados por v (desc).
+ * Consulta as ideias ordenadas por v (descendente) com base em w de consulta.
  */
-export function queryDataPoints(
+export function queryIdeasByW(
   w: number,
   c: number = DEFAULT_C
-): EvaluatedPoint[] {
-  return dataPoints
-    .map((point) => {
-      const v = calculateV(w, point.r, c);
-      return { ...point, v };
-    })
+): (SemanticIdea & { v: number })[] {
+  return ideaStore
+    .map((idea) => ({
+      ...idea,
+      v: calculateV(w, idea.r, c),
+    }))
     .sort((a, b) => b.v - a.v);
 }
 
 /**
- * Limpa todos os dados da memória (útil para testes).
+ * Limpa todas as ideias da memória (útil para testes).
  */
 export function clearMemory(): void {
-  dataPoints.length = 0;
+  ideaStore.length = 0;
 }

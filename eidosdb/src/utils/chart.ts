@@ -1,44 +1,46 @@
 // src/utils/chart.ts
 
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
-import type { EvaluatedPoint } from "../core/symbolicTypes";
+import type { EvaluatedIdea } from "../core/symbolicTypes";
 import * as fs from "fs";
 import * as path from "path";
 
 const width = 800;
 const height = 500;
-const chartCallback = () => {};
 
-const chartJSNodeCanvas = new ChartJSNodeCanvas({
-  width,
-  height,
-  chartCallback,
-});
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
 export async function renderMemoryField(
-  points: EvaluatedPoint[],
+  points: EvaluatedIdea[],
   fileName = "memory_field.png"
-) {
-  const configuration = {
-    type: "scatter" as const,
+): Promise<void> {
+  const configuration: import("chart.js").ChartConfiguration = {
+    type: "scatter",
     data: {
       datasets: [
         {
           label: "Presença simbólica (v) por distância (r)",
           data: points.map((p) => ({ x: p.r, y: p.v })),
-          pointBackgroundColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: "rgba(54, 162, 235, 1)",
           pointRadius: 5,
         },
       ],
     },
     options: {
+      responsive: false,
       scales: {
         x: {
-          title: { display: true, text: "r (distância simbólica)" },
+          title: {
+            display: true,
+            text: "r (distância simbólica)",
+          },
           beginAtZero: true,
         },
         y: {
-          title: { display: true, text: "v (presença simbólica)" },
+          title: {
+            display: true,
+            text: "v (presença simbólica)",
+          },
           beginAtZero: true,
         },
       },
@@ -53,6 +55,7 @@ export async function renderMemoryField(
 
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   const outputPath = path.resolve("data", fileName);
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, image);
   console.log(`🖼️  Campo de memória salvo em: ${outputPath}`);
 }

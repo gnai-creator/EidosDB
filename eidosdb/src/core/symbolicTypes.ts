@@ -1,28 +1,24 @@
 // src/core/symbolicTypes.ts
 
-/**
- * Representa um ponto simbólico no banco de dados.
- */
-export interface DataPoint {
-  id: string;
-  label?: string;
-  w: number; // frequência angular simbólica
-  r: number; // distância simbólica ao centro do pensamento
-  metadata?: Record<string, any>; // informações adicionais (opcional)
+export interface SemanticIdea {
+  id: string; // Hash simbólico único
+  label: string; // Texto da ideia (ex: "tempo é ilusão")
+  vector: number[]; // Embedding semântico (ex: 128 floats)
+  w: number; // Frequência simbólica (atenção)
+  r: number; // Distância simbólica (contexto)
+  context: string; // Nome do cluster (ex: "futuro", "medo")
+  metadata?: Record<string, any>; // Emoção, tipo, origem, etc.
 }
 
-/**
- * Parâmetros de consulta simbólica.
- */
+// Parâmetros de consulta
 export interface QueryParams {
-  w: number;
-  r: number;
-  c?: number; // valor padrão para c, se não for informado
+  w0: number; // Frequência de consulta
+  c?: number; // Valor da constante simbólica (ex: velocidade-limite)
+  label?: string; // Termo a ser embutido semanticamente
+  vector?: number[]; // Vetor já embutido para consulta direta
 }
 
-/**
- * Resultado da avaliação de um DataPoint.
- */
-export interface EvaluatedPoint extends DataPoint {
-  v: number; // velocidade simbólica calculada
+// Resultado com cálculo de v
+export interface EvaluatedIdea extends SemanticIdea {
+  v: number; // Presença simbólica calculada
 }

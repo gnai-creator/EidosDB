@@ -1,6 +1,6 @@
 // src/storage/persistence.ts
 
-import type { DataPoint } from "../core/symbolicTypes";
+import type { SemanticIdea } from "../core/symbolicTypes";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -17,10 +17,10 @@ function ensureDirectoryExists(filePath: string) {
 }
 
 /**
- * Salva os pontos simbólicos em um arquivo JSON.
+ * Salva as ideias simbólicas em um arquivo JSON.
  */
 export function saveToDisk(
-  data: DataPoint[],
+  data: SemanticIdea[],
   filePath: string = DEFAULT_FILE
 ): void {
   ensureDirectoryExists(filePath);
@@ -28,10 +28,10 @@ export function saveToDisk(
 }
 
 /**
- * Carrega os pontos simbólicos de um arquivo JSON.
+ * Carrega as ideias simbólicas de um arquivo JSON.
  */
-export function loadFromDisk(filePath: string = DEFAULT_FILE): DataPoint[] {
+export function loadFromDisk(filePath: string = DEFAULT_FILE): SemanticIdea[] {
   if (!fs.existsSync(filePath)) return [];
   const content = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(content) as DataPoint[];
+  return JSON.parse(content) as SemanticIdea[];
 }
