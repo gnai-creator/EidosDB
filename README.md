@@ -50,6 +50,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **Lightweight Persistence**
   Default storage is in-memory + JSON file. Alternately supports pluggable store (e.g., Redis, SQLite).
 
+* **Optional GPU Decay Loop**
+  Weight decay can leverage GPU.js when installed, falling back to the CPU otherwise.
+
 ---
 
 ## 🧠 Why It Matters
@@ -89,6 +92,18 @@ Endpoints include:
 Set the `EIDOS_STORAGE` variable to `memory` (default), `redis`, or `sqlite` before starting the server.
 To use Redis, install the package and run an available Redis server.
 For SQLite, `npm install` compiles the `better-sqlite3` module without the need for an external service.
+
+---
+
+## ⚡ Optional GPU Acceleration
+
+The decay loop can run on the GPU using [GPU.js](https://github.com/gpujs/gpu.js). Install the library and it will be used automatically:
+
+```bash
+npm install gpu.js
+```
+
+If GPU.js or compatible hardware is unavailable, the system falls back to the CPU implementation.
 
 ---
 
