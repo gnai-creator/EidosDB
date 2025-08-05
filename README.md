@@ -35,6 +35,7 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 
   * **Decay over time** (`tick()` lowers `w`)
   * **Reinforcement** (`reinforce(id)`) to boost an idea
+  * **Symbolic expiration** through per-idea TTL
   * **Context-based filtering** and search
 
 * **REST API Interface**
@@ -112,7 +113,7 @@ Returns a list of ideas sorted by `v` — the higher the `v`, the more present t
 We have a roadmap for enhancing EidosDB including:
 
 * Integration with real semantic models for generating `vector`s
-* Symbolic clustering, TTL/expiration, context-aware snapshots
+* Symbolic clustering, context-aware snapshots
 * GUI dashboard, real-time reinforcement streams, and more
 
 We welcome contributors! See the `TODO.md` for high-level tasks and issue ideas.

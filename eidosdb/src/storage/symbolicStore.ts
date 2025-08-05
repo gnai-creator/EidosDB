@@ -13,9 +13,22 @@ export class EidosStore {
   private readonly minW: number = 1e-6; // Valor mínimo simbólico
 
   /**
+   * Remove ideias cuja soma de timestamp + ttl já expirou.
+   * Evita que pontos simbólicos "fantasmas" permaneçam em memória.
+   */
+  private cleanupExpired(): void {
+    const now = Date.now();
+    this.memory = this.memory.filter((idea) => {
+      if (idea.ttl === undefined || idea.timestamp === undefined) return true;
+      return idea.timestamp + idea.ttl > now;
+    });
+  }
+
+  /**
    * Aplica decaimento simbólico em todos os pontos da memória.
    */
   tick(): void {
+    this.cleanupExpired();
     this.memory = this.memory.map((idea) => ({
       ...idea,
       w: Math.max(idea.w * this.decayFactor, this.minW),
@@ -26,6 +39,7 @@ export class EidosStore {
    * Reestimula uma ideia simbólica, mantendo-a “viva”.
    */
   reinforce(id: string, factor: number = 1.1): void {
+    this.cleanupExpired();
     this.memory = this.memory.map((idea) =>
       idea.id === id ? { ...idea, w: idea.w * factor } : idea
     );
@@ -35,6 +49,7 @@ export class EidosStore {
    * Salva os dados atuais em disco.
    */
   save(filePath?: string): void {
+    this.cleanupExpired();
     saveToDisk(this.memory, filePath);
   }
 
@@ -43,12 +58,17 @@ export class EidosStore {
    */
   load(filePath?: string): void {
     this.memory = loadFromDisk(filePath);
+    this.cleanupExpired();
   }
 
   /**
    * Insere uma nova ideia simbólica na memória.
    */
   insert(idea: SemanticIdea): void {
+    this.cleanupExpired();
+    if (!idea.timestamp) {
+      idea.timestamp = Date.now();
+    }
     this.memory.push(idea);
   }
 
@@ -60,6 +80,7 @@ export class EidosStore {
     c: number = DEFAULT_C,
     selectors: QuerySelectors = {}
   ): (SemanticIdea & { v: number })[] {
+    this.cleanupExpired();
     return this.memory
       .filter((idea) => {
         if (selectors.context && idea.context !== selectors.context) return false;
@@ -112,6 +133,7 @@ export class EidosStore {
    * Retorna uma cópia independente para evitar mutações externas.
    */
   snapshot(): SemanticIdea[] {
+    this.cleanupExpired();
     return this.memory.map((idea) => ({ ...idea }));
   }
 
@@ -121,6 +143,7 @@ export class EidosStore {
    */
   restore(snapshot: SemanticIdea[]): void {
     this.memory = snapshot.map((idea) => ({ ...idea }));
+    this.cleanupExpired();
   }
 
   /**
