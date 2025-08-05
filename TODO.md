@@ -36,7 +36,7 @@
 ## ⚙️ ENGINEERING
 - [x] Full unit test suite (Jest)
 - [x] API rate limiting
-- [ ] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
+- [x] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
 - [ ] Real-time monitoring dashboard
 - [ ] Setup Dockerfile + deployment script
 - [ ] Optional REST-to-GraphQL adapter
