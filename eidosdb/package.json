@@ -14,6 +14,8 @@
     "@types/node": "^24.2.0",
     "better-sqlite3": "^12.2.0",
     "body-parser": "^2.2.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/body-parser": "^1.19.6",
     "chart.js": "^4.5.0",
     "chartjs-node-canvas": "^5.0.0",
     "cors": "^2.8.5",
@@ -22,16 +24,14 @@
     "redis": "^5.8.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "ws": "^8.18.3"
-  },
-  "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/body-parser": "^1.19.6",
-    "@types/chart.js": "^2.9.41",
+    "ws": "^8.18.3",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
-    "@types/ws": "^8.18.1",
+    "@types/ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/chart.js": "^2.9.41",
     "jest": "^30.0.5",
     "ts-jest": "^29.4.1"
   }
