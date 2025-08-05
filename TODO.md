@@ -22,7 +22,7 @@
 ---
 
 ## 🚧 CORE DEVELOPMENT
- - [x] Add ANN (Approximate Nearest Neighbor) for high-speed vector search
+- [x] Add ANN (Approximate Nearest Neighbor) for high-speed vector search
 - [x] Implement vector similarity fallback (cosine or dot-product)
 - [ ] Enable symbolic clustering / selectors (filters by context, metadata, tags)
 - [ ] Enable symbolic snapshots (dump + restore states)
