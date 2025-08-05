@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                        // Output JavaScript moderno
+    "module": "commonjs",                        // Usa import/export padrão
+    "moduleResolution": "node",                // Resolve pacotes como o Node.js
+    "outDir": "./dist",                        // Pasta de saída para build (opcional)
+    "rootDir": "./src",                        // Pasta raiz do projeto
+    "strict": true,                            // Ativa todas as verificações estritas
+    "esModuleInterop": true,                   // Permite importações de módulos CommonJS
+    "forceConsistentCasingInFileNames": true,  // Case-sensitive nos imports
+    "skipLibCheck": true,                      // Ignora erros de tipo em node_modules
+    "verbatimModuleSyntax": false,              // Mantém a sintaxe de import/export intacta
+    "resolveJsonModule": true,                 // Permite importar arquivos .json
+    "types": ["node"]                          // Tipos globais para Node.js
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
