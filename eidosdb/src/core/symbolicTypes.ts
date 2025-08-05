@@ -9,6 +9,7 @@ export interface SemanticIdea {
   context: string; // Nome do cluster (ex: "futuro", "medo")
   timestamp?: number; // Momento de inserção ou ativação
   metadata?: Record<string, any>; // Emoção, tipo, origem, etc.
+  tags?: string[]; // Marcadores simbólicos adicionais
 }
 
 export interface QueryParams {
@@ -20,4 +21,10 @@ export interface QueryParams {
 
 export interface EvaluatedIdea extends SemanticIdea {
   v: number; // Presença simbólica (calculada)
+}
+
+export interface QuerySelectors {
+  context?: string;
+  metadata?: Record<string, any>;
+  tags?: string[];
 }
