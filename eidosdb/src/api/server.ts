@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { createServer } from "http"; // Node HTTP server for Express + WebSocket
 import { WebSocketServer } from "ws"; // WebSocket server for streaming reinforcement
 import { EidosStore } from "../storage/symbolicStore";
@@ -32,6 +33,16 @@ store
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Limitador de taxa para evitar abuso: 100 requisições por minuto por IP
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // Janela de 1 minuto
+  max: 100, // Máximo de 100 requisições por IP
+  standardHeaders: true, // Usa cabeçalhos RateLimit-*
+  legacyHeaders: false, // Desativa cabeçalhos X-RateLimit-*
+});
+
+app.use(limiter);
 
 // Rota para consulta por v com seletores simbólicos
 app.get("/query", async (req, res) => {

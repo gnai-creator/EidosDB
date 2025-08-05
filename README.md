@@ -44,6 +44,9 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **WebSocket reinforcement stream**
   Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
 
+* **API rate limiting**
+  Requests are capped at 100 per minute per IP to prevent abuse.
+
 * **Approximate Nearest Neighbor (ANN) index**
   Accelerated search for similar vectors using locality-sensitive hashing.
 
