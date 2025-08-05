@@ -11,8 +11,8 @@
     "skipLibCheck": true,                      // Ignora erros de tipo em node_modules
     "verbatimModuleSyntax": false,              // Mantém a sintaxe de import/export intacta
     "resolveJsonModule": true,                 // Permite importar arquivos .json
-    "types": ["node"]                          // Tipos globais para Node.js
+    "types": ["node", "jest"]                 // Tipos globais para Node.js e Jest
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*"], // inclui código-fonte e testes
   "exclude": ["node_modules", "dist"]
 }

@@ -118,6 +118,19 @@ Returns a list of ideas sorted by `v` — the higher the `v`, the more present t
 
 ---
 
+## 🧪 Tests
+
+Run the Jest unit tests to verify symbolic behavior:
+
+```bash
+cd eidosdb
+npm test
+```
+
+The test suite lives in the `tests/` folder and covers core utilities and the in‑memory store.
+
+---
+
 ## 🧭 Roadmap & Contributions
 
 We have a roadmap for enhancing EidosDB including:
