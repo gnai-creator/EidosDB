@@ -1,13 +1,12 @@
-// src/semantic/search.ts
+// src/semantic/semanticSearch.ts
 import { SemanticIdea } from "../core/symbolicTypes";
+import { cosineSimilarity } from "./similarity";
+import { AnnIndex } from "./annIndex";
 
-export function cosineSimilarity(a: number[], b: number[]): number {
-  const dot = a.reduce((sum, ai, i) => sum + ai * b[i], 0);
-  const normA = Math.sqrt(a.reduce((sum, ai) => sum + ai * ai, 0));
-  const normB = Math.sqrt(b.reduce((sum, bi) => sum + bi * bi, 0));
-  return dot / (normA * normB + 1e-8);
-}
-
+/**
+ * Busca exata de vizinhos mais próximos utilizando similaridade de cosseno.
+ * Útil para conjuntos pequenos de vetores.
+ */
 export function findNearestIdeas(
   ideas: SemanticIdea[],
   queryVector: number[],
@@ -22,3 +21,23 @@ export function findNearestIdeas(
     .slice(0, topK)
     .map((entry) => entry.idea);
 }
+
+/**
+ * Busca aproximada utilizando um índice ANN.
+ * O índice é construído de forma simples via LSH com hiperplanos aleatórios
+ * (ver `annIndex.ts`). Ele permite acelerar consultas em bases grandes
+ * sacrificando um pouco de precisão.
+ */
+export function findNearestIdeasANN(
+  ideas: SemanticIdea[],
+  queryVector: number[],
+  topK = 5
+): SemanticIdea[] {
+  if (ideas.length === 0) return [];
+  const dims = ideas[0].vector.length;
+  const index = new AnnIndex(dims);
+  index.build(ideas);
+  return index.query(queryVector, topK);
+}
+
+export { AnnIndex };
