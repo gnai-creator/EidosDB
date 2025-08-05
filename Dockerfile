@@ -7,6 +7,16 @@ WORKDIR /app
 # Copiar arquivos de dependências para otimizar o cache de build
 COPY eidosdb/package*.json ./
 
+# Pacotes necessários para build do canvas
+RUN apk add --no-cache \
+    g++ \
+    make \
+    python3 \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev
+
 # Instalar dependências sem pacotes de desenvolvimento
 RUN npm ci --omit=dev
 
