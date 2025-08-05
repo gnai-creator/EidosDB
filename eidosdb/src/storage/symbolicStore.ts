@@ -9,6 +9,27 @@ import { saveToDisk, loadFromDisk } from "./persistence";
  */
 export class EidosStore {
   private memory: DataPoint[] = [];
+  private readonly decayFactor: number = 0.95; // 5% de perda por tick
+  private readonly minW: number = 1e-6; // Valor mínimo simbólico
+
+  /**
+   * Aplica decaimento simbólico em todos os pontos da memória.
+   */
+  tick(): void {
+    this.memory = this.memory.map((point) => ({
+      ...point,
+      w: Math.max(point.w * this.decayFactor, this.minW),
+    }));
+  }
+
+  /**
+   * Reestimula um ponto da memória, mantendo-o “vivo”.
+   */
+  reinforce(id: string, factor: number = 1.1): void {
+    this.memory = this.memory.map((point) =>
+      point.id === id ? { ...point, w: point.w * factor } : point
+    );
+  }
 
   /**
    * Salva os dados atuais em disco.

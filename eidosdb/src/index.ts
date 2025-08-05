@@ -9,14 +9,14 @@ function displayResults(
   console.log(`\n=== ${title} ===`);
   for (const point of points) {
     console.log(
-      `ID: ${point.id} | w: ${point.w.toFixed(3)} | r: ${point.r.toFixed(
+      `ID: ${point.id} | w: ${point.w.toFixed(6)} | r: ${point.r.toFixed(
         2
       )} | v: ${point.v.toFixed(2)}`
     );
   }
 }
 
-function main() {
+async function main() {
   const store = new EidosStore();
 
   // Inserir dados simbólicos de exemplo
@@ -31,26 +31,38 @@ function main() {
   examples.forEach((dp) => store.insert(dp));
 
   const wQuery = 0.003;
-  const result = store.query(wQuery);
 
+  // Consulta inicial
+  const result = store.query(wQuery);
   displayResults(`Query with w = ${wQuery}`, result);
 
   // Salvar em disco
   store.save();
   console.log("\n🧠 Memória salva em 'data/eidosdb.json'");
 
-  // Limpar e mostrar memória vazia
+  // Limpar e restaurar
   store.clear();
   console.log("\n🚫 Memória limpa:", store.dump());
 
-  // Carregar novamente do disco
   store.load();
   console.log("\n🔁 Memória restaurada:");
   displayResults("Dump após load()", store.query(wQuery));
-  renderMemoryField(store.query(wQuery), "memory_field.png");
-  console.log(
-    "\n🖼️ Campo de memória renderizado e salvo como 'data/memory_field.png'"
-  );
+
+  // Gerar gráfico do campo de memória
+  await renderMemoryField(store.query(wQuery), "memory_field.png");
+
+  // Simular decaimento temporal
+  console.log("\n⏳ Simulando 5 ciclos de decaimento:");
+  for (let i = 1; i <= 5; i++) {
+    store.tick();
+    console.log(`\n--- Tick ${i} ---`);
+    displayResults(`Query após tick ${i}`, store.query(wQuery));
+  }
+
+  // Reforçar uma ideia
+  console.log("\n🔁 Reforçando 'beta'");
+  store.reinforce("beta", 2.0);
+  displayResults("Após reforço de 'beta'", store.query(wQuery));
 }
 
 main();
