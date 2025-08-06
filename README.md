@@ -220,7 +220,7 @@ We welcome contributors! See the `TODO.md` for high-level tasks and issue ideas.
 ## 📧 Contact & License
 
 **Author**: Felipe Muniz – 2025
-**License**: Custom symbolic (non-commercial research).
+**License**: Distributed under the [Creative Commons Attribution-NonCommercial 4.0 International](LICENSE) license (CC BY-NC 4.0). You may use and share the code with attribution for non-commercial purposes.
 Feel free to contribute or reach out via GitHub or email if you're interested in collaboration.
 
 ---
