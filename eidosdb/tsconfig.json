@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",                        // Output JavaScript moderno
-    "module": "commonjs",                        // Usa import/export padrão
+    "module": "Node16",                          // Usa import/export padrão
     "moduleResolution": "node16",              // Suporta exports de pacotes modernos
     "outDir": "./dist",                        // Pasta de saída para build (opcional)
     "strict": true,                            // Ativa todas as verificações estritas
