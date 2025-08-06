@@ -1,5 +1,6 @@
 import { buildSchema, GraphQLScalarType, Kind, type ValueNode } from "graphql";
-import { graphqlHTTP } from "express-graphql";
+import { createHandler } from "graphql-http/lib/use/express";
+import { ruruHTML } from "ruru/server";
 import type { Express } from "express";
 import type { EidosStore } from "../storage/symbolicStore";
 import type { SemanticIdea } from "../core/symbolicTypes";
@@ -125,12 +126,9 @@ export function createSchema(store: EidosStore) {
  */
 export function setupGraphQL(app: Express, store: EidosStore) {
   const { schema, root } = createSchema(store);
-  app.use(
-    "/graphql",
-    graphqlHTTP({
-      schema,
-      rootValue: root,
-      graphiql: true, // Interface web interativa para testes
-    })
-  );
+  app.use("/graphql", createHandler({ schema, rootValue: root }));
+  app.get("/graphiql", (_req, res) => {
+    res.type("html");
+    res.end(ruruHTML({ endpoint: "/graphql" }));
+  });
 }
