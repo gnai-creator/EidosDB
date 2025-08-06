@@ -16,4 +16,8 @@ fi
 docker build -t $IMAGEM .
 
 # Iniciar o contêiner em segundo plano
-docker run -d --name $CONTAINER -p 3000:3000 $IMAGEM
+docker run -d \
+  --name "$CONTAINER" \
+  -p 3000:3000 \
+  -e EIDOS_ACCEPT_LICENSE=true \
+  "$IMAGEM"
