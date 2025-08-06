@@ -18,13 +18,18 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 
 ## 🧬 How It’s Different
 
-Unlike traditional vector databases or note-taking systems, EidosDB combines:
+EidosDB is not just a vector store — it’s a **cognitive substrate** for symbolic AI.
+
+Unlike Pinecone, Weaviate, or RedisVector, it combines:
 
 - **Semantic memory** (via embeddings)
 - **Symbolic reasoning** (via dynamic metadata, intention, and decay)
 - **Temporal dynamics** (ideas evolve, fade, and strengthen)
+- **Contextual and symbolic filtering**, beyond cosine similarity
+- **Presence score (`v`)** based on a physics-inspired model
+- **Real-time reinforcement streams** for agents that learn over time
 
-EidosDB is built as a **cognitive substrate** for AI — where ideas aren't just stored, but **exist, change, and compete** for presence. This makes it ideal for agents that need evolving symbolic knowledge, such as AGI prototypes, memory-based reasoning systems, and self-reflective assistants.
+This makes EidosDB ideal for agents that need evolving symbolic knowledge, such as AGI prototypes, memory-based reasoning systems, and self-reflective assistants.
 
 ---
 
