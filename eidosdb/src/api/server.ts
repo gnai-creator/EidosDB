@@ -14,7 +14,9 @@ import type { StorageAdapter } from "../storage/storageAdapter";
 import type { SemanticIdea } from "../core/symbolicTypes";
 import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
+import { validarLicenca } from "../utils/license";
 
+validarLicenca();
 const app = express();
 
 const storageType = process.env.EIDOS_STORAGE || "memory";
