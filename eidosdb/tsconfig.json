@@ -4,7 +4,6 @@
     "module": "commonjs",                        // Usa import/export padrão
     "moduleResolution": "node",                // Resolve pacotes como o Node.js
     "outDir": "./dist",                        // Pasta de saída para build (opcional)
-    "rootDir": "./src",                        // Pasta raiz do projeto
     "strict": true,                            // Ativa todas as verificações estritas
     "esModuleInterop": true,                   // Permite importações de módulos CommonJS
     "forceConsistentCasingInFileNames": true,  // Case-sensitive nos imports
