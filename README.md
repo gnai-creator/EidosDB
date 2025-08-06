@@ -96,6 +96,32 @@ Endpoints include:
 * `GET /dump` → Dump memory snapshot
 * `POST /restore` → Restore memory from a snapshot
 
+### API keys and tiers
+
+All HTTP requests require an `x-api-key` header. Keys are defined in `eidosdb/data/api-keys.json` and map to access tiers.
+
+Example of key file:
+
+```json
+{
+  "basic-key": "basic",
+  "premium-key": "premium"
+}
+```
+
+Each tier controls the number of allowed requests per minute:
+
+| Tier    | Limit (req/min) |
+|---------|-----------------|
+| basic   | 5               |
+| premium | 1000            |
+
+Use the key in requests:
+
+```bash
+curl -H "x-api-key: basic-key" http://localhost:3000/dump
+```
+
 ### GraphQL endpoint
 
 Set the `EIDOS_GRAPHQL=true` environment variable to expose a GraphQL API at `/graphql` with a built-in GraphiQL playground.
