@@ -9,6 +9,7 @@ import { calculateV, DEFAULT_C } from "../core/formula";
 export interface SymbolicMetrics {
   averageV: number;
   dominantCluster: string | null;
+  heatmap: number[][];
 }
 
 /**
@@ -19,14 +20,18 @@ export function computeSymbolicMetrics(
   c: number = DEFAULT_C,
 ): SymbolicMetrics {
   if (ideas.length === 0) {
-    return { averageV: 0, dominantCluster: null };
+    return { averageV: 0, dominantCluster: null, heatmap: [] };
   }
 
   let sumV = 0;
   const clusterWeights = new Map<string, number>();
 
+  // Lista de valores de v para construir o mapa de calor
+  const valoresV: number[] = [];
+
   for (const idea of ideas) {
     const v = calculateV(idea.w, idea.r, c);
+    valoresV.push(v);
     sumV += v;
     clusterWeights.set(
       idea.context,
@@ -43,9 +48,21 @@ export function computeSymbolicMetrics(
     }
   }
 
+  // Converte a lista linear de v em uma grade quadrada para o heatmap
+  const tamanho = Math.ceil(Math.sqrt(valoresV.length));
+  const heatmap: number[][] = Array.from({ length: tamanho }, () =>
+    Array(tamanho).fill(0),
+  );
+  valoresV.forEach((v, idx) => {
+    const linha = Math.floor(idx / tamanho);
+    const coluna = idx % tamanho;
+    heatmap[linha][coluna] = v;
+  });
+
   return {
     averageV: sumV / ideas.length,
     dominantCluster,
+    heatmap,
   };
 }
 

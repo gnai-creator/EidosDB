@@ -32,11 +32,14 @@ test('calcula média de v e cluster dominante', () => {
 
   expect(metrics.averageV).toBeCloseTo(expectedAvg);
   expect(metrics.dominantCluster).toBe('beta');
+  expect(metrics.heatmap.length).toBe(2);
+  expect(metrics.heatmap[0][0]).toBeCloseTo(calculateV(0.002, 1));
 });
 
 test('retorna métricas neutras quando vazio', () => {
   const metrics = computeSymbolicMetrics([]);
   expect(metrics.averageV).toBe(0);
   expect(metrics.dominantCluster).toBeNull();
+  expect(metrics.heatmap).toEqual([]);
 });
 

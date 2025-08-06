@@ -86,8 +86,8 @@ This makes EidosDB ideal for agents that need evolving symbolic knowledge, such 
 * **WebSocket reinforcement stream**
   Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
 
-* **Real-time monitoring dashboard**
-  Observe symbolic metrics live at `http://localhost:3000/dashboard`.
+* **Interactive real-time dashboard**
+  Observe symbolic metrics live at `http://localhost:3000/dashboard`, now with an embedded browser and memory heatmap for exploration.
 
 * **API rate limiting & usage tracking**
   Requests are limited per API key and total daily usage is monitored.
@@ -126,7 +126,7 @@ EidosDB is ideal for:
    npx ts-node src/api/server.ts
    ```
 4. Access API on [http://localhost:3000](http://localhost:3000)
-5. Open the real-time dashboard at [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
+5. Open the interactive dashboard (embedded browser + memory heatmap) at [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 Endpoints include:
 
