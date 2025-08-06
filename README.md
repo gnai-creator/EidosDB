@@ -51,8 +51,10 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 * **Real-time monitoring dashboard**
   Observe symbolic metrics live at `http://localhost:3000/dashboard`.
 
-* **API rate limiting**
-  Requests are capped at 100 per minute per IP to prevent abuse.
+* **API rate limiting & usage tracking**
+  Requests are limited per API key and total daily usage is monitored.
+  Keys that exceed the `USAGE_LIMIT` (default 10k requests/24h) are automatically
+  blocked to prevent abuse.
 
 * **Approximate Nearest Neighbor (ANN) index**
   Accelerated search for similar vectors using locality-sensitive hashing.
@@ -97,6 +99,7 @@ Endpoints include:
 * `WS ws://localhost:3000/reinforce-stream` → Stream reinforcement events in JSON
 * `GET /dump` → Dump memory snapshot
 * `POST /restore` → Restore memory from a snapshot
+* `GET /usage` → Check API key usage statistics
 
 ### API keys and tiers
 
@@ -123,6 +126,10 @@ Use the key in requests:
 ```bash
 curl -H "x-api-key: basic-key" http://localhost:3000/dump
 ```
+
+A daily cap is controlled by the `USAGE_LIMIT` environment variable
+(default: `10000`). When a key exceeds this limit within 24 hours it is
+blocked automatically.
 
 ### GraphQL endpoint
 

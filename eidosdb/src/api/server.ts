@@ -16,6 +16,7 @@ import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 import { validarLicenca } from "../utils/license";
 import { obterTier, limitesPorTier } from "../utils/apiKey";
+import { registrarUso, obterUso } from "../utils/usageTracker";
 
 validarLicenca();
 const app = express();
@@ -54,6 +55,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rastreamento de uso por chave e bloqueio simples contra abuso
+app.use((req, res, next) => {
+  const chave = (req as any).apiKey as string;
+  // registrarUso retorna false caso o limite diário tenha sido excedido
+  if (!registrarUso(chave)) {
+    return res.status(429).send("Limite diário de uso excedido");
+  }
+  next();
+});
+
 // Limitador de taxa baseado no tier da chave de API
 const limiter = rateLimit({
   windowMs: 60 * 1000, // Janela de 1 minuto
@@ -76,6 +87,11 @@ if (process.env.EIDOS_GRAPHQL === "true") {
 // Rota para servir o painel de monitoramento em tempo real
 app.get("/dashboard", (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "dashboard.html"));
+});
+
+// Exibe estatísticas simples de uso por chave de API
+app.get("/usage", (_req: Request, res: Response) => {
+  res.json(obterUso());
 });
 
 // Rota para consulta por v com seletores simbólicos
