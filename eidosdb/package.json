@@ -34,9 +34,7 @@
     "ts-node": "^10.9.2",
     "tsne-js": "^1.0.3",
     "typescript": "^5.9.2",
-    "ws": "^8.18.3",
-    "ml-pca": "^3.5.0",
-    "tsne-js": "^1.2.1"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.41",

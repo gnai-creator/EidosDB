@@ -1,77 +1,111 @@
-# TODO — EidosDB Backend Roadmap
+# TODO — EidosDB Development Roadmap
 
-> Projeto: EidosDB (engine simbólica)
-> Repositório: `eidosdb`
-> Autor: Felipe Muniz
+> Author: Felipe Muniz
+> Project: EidosDB
+> Status: Draft
 
 ---
 
-## ✅ CONCLUÍDO
+## ✅ DONE
 
+* [x] Symbolic idea schema (SemanticIdea)
+* [x] Velocity formula (`v = 4wr / (π√(1 - (wr/c)^2))`)
 * [x] API core: insert, query, decay, reinforce, dump
-* [x] ANN (Approximate Nearest Neighbor)
-* [x] Similaridade vetorial com fallback (cosine / dot)
-* [x] Clustering simbólico (por tags e contexto)
-* [x] Snapshots simbólicos (dump / restore)
-* [x] TTL por ideia (decadência com tempo)
-* [x] Exportação para Redis e SQLite
-* [x] Reforço via WebSocket / stream
-* [x] Loop de decay com suporte a GPU (opcional)
-* [x] Licença CC BY-NC 4.0 + validador
-* [x] Sistema de chaves de API com tiers
-* [x] Dashboard de monitoramento simbólico
-* [x] Adapter opcional REST → GraphQL
+* [x] In-memory storage engine
+* [x] JSON persistence
+* [x] TypeScript structure
+* [x] Whitepaper (EN/PT)
+* [x] Pitch deck outline
+* [x] GitHub repo & basic docs
+* [x] License
+* [x] ResearchGate submission (in progress)
 
 ---
 
-## ⚙️ ENGENHARIA E INFRA
+## 🚧 CORE DEVELOPMENT
 
-* [ ] Refatorar decodificador de entrada (normalizar vetores e símbolos)
-* [ ] Adicionar testes e benchmarks com carga sintética
-* [ ] Criar /benchmark endpoint para medir latência
-* [ ] Testes com LLM para comparação de resgate simbólico
-
----
-
-## 🔬 PESQUISA
-
-* [ ] Publicar artigo no arXiv (CS.AI / Symbolic Reasoning)
-* [ ] Benchmark com vector DBs padrão (Pinecone, Weaviate, Redis)
-* [ ] Analisar relevância simbólica ao longo do tempo
-* [ ] Comparar com arquiteturas neuro-simbólicas (MEMNET, DNC, RETAIN)
+* [x] Add ANN (Approximate Nearest Neighbor) for high-speed vector search
+* [x] Implement vector similarity fallback (cosine or dot-product)
+* [x] Enable symbolic clustering / selectors (filters by context, metadata, tags)
+* [x] Enable symbolic snapshots (dump + restore states)
+* [x] Implement TTL (time-to-live) or symbolic expiration
+* [x] Export to Redis or SQLite as pluggable storage option
+* [x] Stream-based reinforcement (via websocket or Kafka)
+* [x] Optimize decay loop for GPU (optional)
 
 ---
 
-## 🧠 EVOLUÇÃO SIMBÓLICA
+## ⚙️ ENGINEERING
 
-### Inteligência e Memória
-
-* [ ] Interação multi-agente via EidosNet
-* [ ] Detecção de contradição simbólica
-* [ ] Motor de mutação conceitual (evolução de ideias)
-* [ ] Compressão adaptativa de memória (cluster pruning)
-
-### Raciocínio Reflexivo
-
-* [ ] Avaliador de meta-consistência (“minha ontologia se contradiz?”)
-* [ ] Curadoria automática e decay seletivo
-* [ ] Queries reflexivas (“o que mudou na minha visão?”)
-* [ ] Loop simbólico: outputs que viram inputs
-
-### Integrações externas
-
-* [ ] Loop com LLMs externos (feedback contextual)
-* [ ] Sincronização de embeddings externos (OpenAI, HuggingFace)
-* [ ] Alinhamento simbólico-vetorial automático
+* [x] Full unit test suite (Jest)
+* [x] API rate limiting
+* [x] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
+* [x] Real-time monitoring dashboard
+* [x] Setup Dockerfile + deployment script
+* [x] Optional REST-to-GraphQL adapter
 
 ---
 
-## 📦 FERRAMENTAS DEV
+## 🔐 SECURITY & LICENSE
 
-* [ ] CLI client (`eidos query "..."`)
-* [ ] Mini desktop viewer (inspecionar estado simbólico)
-* [ ] Exportador `.eidostate` (com estado e contexto)
+* [x] CC BY-NC 4.0 license
+* [x] License validator at runtime
+* [x] API key system (with tier control)
+* [x] Usage tracking + abuse prevention
 
 ---
 
-> Última atualização: 2025-08-05
+## 💡 PRODUCT FEATURES
+
+* [x] Interactive dashboard (embed browser + memory heatmap)
+* [x] Semantic visualizer: PCA/tSNE of vectors by cluster/context
+* [ ] CLI client for local insert/query/decay
+* [ ] Desktop mini-tool for memory inspection
+* [ ] GUI assistant to simulate AGI memory (timeline interface)
+
+---
+
+## 📈 GROWTH / DISTRIBUTION
+
+* [ ] Public landing page (eidosdb.com on eidosdb.dev)
+* [ ] App Store/Marketplace listings (e.g. G2, ProductHunt, GitHub Marketplace)
+* [p] Community: Discord / GitHub Discussions
+* [ ] Publish tutorial video (how it works)
+* [ ] Write comparison post: EidosDB vs VectorDB vs LLM-memory
+
+---
+
+## 🔬 RESEARCH TRACK
+
+* [ ] Submit paper to arXiv (CS.AI / Symbolic Reasoning)
+* [ ] Compare with neural-symbolic hybrid architectures
+* [ ] Publish benchmark results: speed, memory decay, symbolic relevance over time
+
+---
+
+## 🧠 FUTURE IDEAS
+
+### Symbolic Intelligence & Memory
+
+* [ ] Multi-agent memory interaction (EidosDB → EidosNet)
+* [ ] Symbolic contradiction detection
+* [ ] Conceptual mutation engine (evolution of ideas)
+* [ ] Adaptive memory compression (cluster pruning)
+
+### Reflective Reasoning
+
+* [ ] Meta-consistency evaluator: "minha ontologia se contradiz?"
+* [ ] Auto-curation and memory cleaning (low-v concepts decay faster)
+* [ ] Reflexive queries: "o que mudou na minha visão?"
+* [ ] Symbolic loopback: outputs voltam como entradas simbólicas
+
+### Integration
+
+* [ ] EidosDB + LLM feedback loop
+* [ ] Embedding sync from external models
+* [ ] Vector-symbology auto-alignment
+
+---
+
+> Last updated: 2025-08-05
+> Suggested format: maintain TODO.md inside the root of repo and sync it with each milestone
