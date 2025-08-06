@@ -69,7 +69,7 @@
 
 * [ ] Public landing page (eidosdb.com on eidosdb.dev)
 * [ ] App Store/Marketplace listings (e.g. G2, ProductHunt, GitHub Marketplace)
-* [ ] Community: Discord / GitHub Discussions
+* [p] Community: Discord / GitHub Discussions
 * [ ] Publish tutorial video (how it works)
 * [ ] Write comparison post: EidosDB vs VectorDB vs LLM-memory
 
