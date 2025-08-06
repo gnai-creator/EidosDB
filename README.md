@@ -89,9 +89,6 @@ This makes EidosDB ideal for agents that need evolving symbolic knowledge, such 
 * **Interactive real-time dashboard**
   Observe symbolic metrics live at `http://localhost:3000/dashboard`, now with an embedded browser and memory heatmap for exploration.
 
-* **Semantic visualizer**
-  Generate PCA or t-SNE scatter plots of stored ideas grouped by context using a CLI tool (`npm run visualize`).
-
 * **API rate limiting & usage tracking**
   Requests are limited per API key and total daily usage is monitored.
   Keys that exceed the `USAGE_LIMIT` (default 10k requests/24h) are automatically
@@ -239,19 +236,6 @@ npm install gpu.js
 ```
 
 If GPU.js or compatible hardware is unavailable, the system falls back to the CPU implementation.
-
----
-
-## 🎨 Semantic Visualizer
-
-Generate a 2D map of ideas using PCA or t-SNE. The tool groups points by `context` so clusters stand out visually.
-
-```bash
-cd eidosdb
-npm run visualize -- input.json output.png tsne
-```
-
-`input.json` should contain an array of `SemanticIdea` objects. The third argument selects the algorithm (`pca` by default).
 
 ---
 
