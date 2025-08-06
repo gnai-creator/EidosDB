@@ -33,6 +33,25 @@ This makes EidosDB ideal for agents that need evolving symbolic knowledge, such 
 
 ---
 
+### 🧠 Symbolic Memory Comparison Table
+
+| Feature                          | **EidosDB**                           | **Pinecone**                 | **Weaviate**                     | **RedisVector**            |
+| -------------------------------- | ------------------------------------- | ---------------------------- | -------------------------------- | -------------------------- |
+| **Data Type**                    | Symbolic ideas with vectors & context | Vectors only                 | Vectors + optional metadata      | Vectors with metadata      |
+| **Symbolic Reasoning**           | ✅ Yes (intention, decay, presence)    | ❌ No                         | ❌ No                             | ❌ No                       |
+| **Temporal Decay**               | ✅ Yes (per idea, with reinforcement)  | ❌ No                         | ⚠️ Limited (no decay by default) | ❌ No                       |
+| **Presence Score (`v`)**         | ✅ Physics-inspired formula            | ❌ N/A                        | ❌ N/A                            | ❌ N/A                      |
+| **Contextual Querying**          | ✅ Tags + context + symbolic filters   | ⚠️ Filters by namespace/tags | ✅ Filters supported              | ✅ Filters via metadata     |
+| **Real-time Reinforcement**      | ✅ WebSocket + API-based               | ❌ No                         | ❌ No                             | ❌ No                       |
+| **Embedding Storage**            | ✅ Custom or external                  | ✅ Yes                        | ✅ Built-in + external support    | ✅ External only            |
+| **Storage Backend**              | Memory / JSON / Redis / SQLite        | Managed only                 | Local / Cloud / Customizable     | Redis only                 |
+| **GraphQL Support**              | ✅ Optional                            | ❌ No                         | ✅ Native GraphQL                 | ❌ No                       |
+| **Dashboard / Monitoring**       | ✅ Real-time symbolic dashboard        | ✅ Usage dashboard only       | ✅ Explorer UI                    | ⚠️ CLI/insights via Redis  |
+| **Designed for AGI / Reasoning** | ✅ Core purpose                        | ❌ No                         | ❌ No                             | ❌ No                       |
+| **License**                      | CC BY-NC 4.0 (open source)            | Commercial SaaS (closed)     | Open Source (Apache 2.0)         | Open Source (BSD 3-Clause) |
+
+---
+
 ## 🔍 Key Features
 
 * **Hybrid Symbolic Semantic Model**
