@@ -57,7 +57,7 @@
 
 ## 💡 PRODUCT FEATURES
 
-* [ ] Interactive dashboard (embed browser + memory heatmap)
+* [x] Interactive dashboard (embed browser + memory heatmap)
 * [ ] Semantic visualizer: PCA/tSNE of vectors by cluster/context
 * [ ] CLI client for local insert/query/decay
 * [ ] Desktop mini-tool for memory inspection

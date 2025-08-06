@@ -4,11 +4,18 @@
   <meta charset="UTF-8" />
   <title>EidosDB Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.3.0"></script>
 </head>
 <body>
   <h1>EidosDB Metrics</h1>
   <p id="cluster">Cluster Dominante: -</p>
   <canvas id="chart" width="600" height="300"></canvas>
+  <h2>Mapa de Calor da Memória</h2>
+  <canvas id="heat" width="300" height="300"></canvas>
+  <h2>Navegador Embutido</h2>
+  <input id="url" type="text" value="https://example.org" size="40" />
+  <button id="go">Carregar</button>
+  <iframe id="browser" width="600" height="400"></iframe>
   <script>
     // Conecta ao servidor WebSocket para receber métricas em tempo real
     const socket = new WebSocket('ws://localhost:3000/metrics-stream');
@@ -52,6 +59,47 @@
       chart.data.labels.push('');
       chart.data.datasets[0].data.push(metrics.averageV);
       chart.update();
+      // Atualiza o mapa de calor com os valores de v recebidos
+      atualizarMapa(metrics.heatmap);
+    });
+
+    // Configuração do mapa de calor usando chartjs-chart-matrix
+    const heatCtx = document.getElementById('heat').getContext('2d');
+    const heatChart = new Chart(heatCtx, {
+      type: 'matrix',
+      data: { datasets: [{ data: [] }] },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { display: false },
+        },
+      },
+    });
+
+    // Função para traduzir a matriz de v em dados para o gráfico
+    function atualizarMapa(matriz) {
+      const dados = [];
+      let max = 0;
+      matriz.forEach((linha, y) => {
+        linha.forEach((valor, x) => {
+          if (valor > max) max = valor;
+          dados.push({ x, y, v: valor });
+        });
+      });
+      heatChart.data.datasets[0].data = dados;
+      heatChart.data.datasets[0].backgroundColor = ctx => {
+        const value = ctx.dataset.data[ctx.dataIndex].v;
+        const alpha = max === 0 ? 0 : value / max;
+        return `rgba(255, 0, 0, ${alpha})`;
+      };
+      heatChart.update();
+    }
+
+    // Navegador simples: carrega a URL digitada no iframe
+    document.getElementById('go').addEventListener('click', () => {
+      const url = (document.getElementById('url')).value;
+      document.getElementById('browser').src = url;
     });
   </script>
 </body>
