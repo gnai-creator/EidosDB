@@ -1,5 +1,7 @@
 ![EidosDB Logo](./eidosdb/assets/EidosDB_Transparent.png)
-
+![License](https://img.shields.io/badge/license-CC--BY--NC%204.0-blue)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
 # EidosDB
 
 **EidosDB** — *The Symbolic Memory Engine for Next‑Gen AI*
@@ -11,6 +13,18 @@
 EidosDB is a novel memory engine that combines symbolic reasoning with semantic embeddings and temporal dynamics. Instead of merely storing data, it treats each idea as a living entity that *remembers, decays, and adapts* based on use.
 
 Think of it as a **cognitive layer**—a memory that fades, reinforces, and ranks thoughts based on context and intensity.
+
+---
+
+## 🧬 How It’s Different
+
+Unlike traditional vector databases or note-taking systems, EidosDB combines:
+
+- **Semantic memory** (via embeddings)
+- **Symbolic reasoning** (via dynamic metadata, intention, and decay)
+- **Temporal dynamics** (ideas evolve, fade, and strengthen)
+
+EidosDB is built as a **cognitive substrate** for AI — where ideas aren't just stored, but **exist, change, and compete** for presence. This makes it ideal for agents that need evolving symbolic knowledge, such as AGI prototypes, memory-based reasoning systems, and self-reflective assistants.
 
 ---
 
@@ -265,3 +279,21 @@ Feel free to contribute or reach out via GitHub or email if you're interested in
 EidosDB is **not just a database**—it’s a **memory engine for symbolic intelligence**. It models ideas as entities that *live, fade, and grow* within their context—opening new possibilities in cognitive AI and knowledge modeling.
 
 Try it, experiment, and join the symbolic memory movement!
+
+---
+
+## 🎯 Demo & Showcase
+
+Coming soon: interactive web demo of EidosDB with symbolic ideas, live decay, and memory exploration UI.
+
+> Want to try it early? Reach out or clone the repo and activate `/dashboard`.
+
+---
+
+## 🌐 Join the Movement
+
+We're building a new kind of memory — symbolic, semantic, temporal.
+
+Join us:
+- [Discord Server](https://discord.gg/N6c26QVf6U)
+- [Roadmap: TODO.md](./TODO.md)
