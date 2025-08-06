@@ -1,3 +1,5 @@
+![EidosDB Logo](./eidosdb/assets/EidosDB_Transparent.png)
+
 # EidosDB
 
 **EidosDB** — *The Symbolic Memory Engine for Next‑Gen AI*
