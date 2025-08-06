@@ -45,7 +45,7 @@
 
 ## 🔐 SECURITY & LICENSE
 - [x] CC BY-NC 4.0 license
-- [ ] License validator at runtime
+- [x] License validator at runtime
 - [ ] API key system (with tier control)
 - [ ] Usage tracking + abuse prevention
 
