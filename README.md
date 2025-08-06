@@ -40,6 +40,8 @@ Think of it as a **cognitive layer**—a memory that fades, reinforces, and rank
 
 * **REST API Interface**
   Easily insert, query, decay, or reinforce memory via HTTP endpoints like `/insert`, `/query`, `/tick`, `/reinforce`.
+* **Optional GraphQL endpoint**
+  Expose the same operations via `/graphql` when enabled.
 
 * **WebSocket reinforcement stream**
   Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
@@ -93,6 +95,44 @@ Endpoints include:
 * `WS ws://localhost:3000/reinforce-stream` → Stream reinforcement events in JSON
 * `GET /dump` → Dump memory snapshot
 * `POST /restore` → Restore memory from a snapshot
+
+### GraphQL endpoint
+
+Set the `EIDOS_GRAPHQL=true` environment variable to expose a GraphQL API at `/graphql` with a built-in GraphiQL playground.
+Example:
+
+```bash
+EIDOS_GRAPHQL=true npx ts-node src/api/server.ts
+```
+
+Sample query:
+
+```graphql
+{
+  ideas(w: 0.003, context: "philosophy") {
+    id
+    label
+    v
+  }
+}
+```
+
+Sample mutation:
+
+```graphql
+mutation {
+  insertIdea(
+    input: {
+      id: "alpha"
+      label: "time is illusion"
+      vector: [0.1]
+      w: 0.002
+      r: 2000
+      context: "philosophy"
+    }
+  )
+}
+```
 
 ### Storage adapters
 

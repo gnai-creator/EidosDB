@@ -39,7 +39,7 @@
 - [x] Logging system with symbolic metrics (e.g. average `v`, dominant cluster)
 - [x] Real-time monitoring dashboard
 - [x] Setup Dockerfile + deployment script
-- [ ] Optional REST-to-GraphQL adapter
+- [x] Optional REST-to-GraphQL adapter
 
 ---
 
