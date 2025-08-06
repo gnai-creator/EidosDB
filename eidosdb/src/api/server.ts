@@ -5,7 +5,6 @@ import rateLimit from "express-rate-limit";
 import { createServer } from "http"; // Node HTTP server para Express + WebSocket
 import { WebSocketServer } from "ws"; // Servidor WebSocket para streaming
 import type { WebSocket, RawData } from "ws";
-import path from "path"; // Utilizado para servir arquivos estáticos
 import { EidosStore } from "../storage/symbolicStore";
 import { RedisStore } from "../storage/redisStore";
 import { SQLiteStore } from "../storage/sqliteStore";
@@ -83,11 +82,6 @@ app.use(limiter);
 if (process.env.EIDOS_GRAPHQL === "true") {
   setupGraphQL(app, store);
 }
-
-// Rota para servir o painel de monitoramento em tempo real
-app.get("/dashboard", (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "dashboard.html"));
-});
 
 // Exibe estatísticas simples de uso por chave de API
 app.get("/usage", (_req: Request, res: Response) => {

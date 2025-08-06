@@ -46,7 +46,7 @@ This makes EidosDB ideal for agents that need evolving symbolic knowledge, such 
 | **Embedding Storage**            | ✅ Custom or external                  | ✅ Yes                        | ✅ Built-in + external support    | ✅ External only            |
 | **Storage Backend**              | Memory / JSON / Redis / SQLite        | Managed only                 | Local / Cloud / Customizable     | Redis only                 |
 | **GraphQL Support**              | ✅ Optional                            | ❌ No                         | ✅ Native GraphQL                 | ❌ No                       |
-| **Dashboard / Monitoring**       | ✅ Real-time symbolic dashboard        | ✅ Usage dashboard only       | ✅ Explorer UI                    | ⚠️ CLI/insights via Redis  |
+| **Dashboard / Monitoring**       | Via eidosdb-frontend                  | ✅ Usage dashboard only       | ✅ Explorer UI                    | ⚠️ CLI/insights via Redis  |
 | **Designed for AGI / Reasoning** | ✅ Core purpose                        | ❌ No                         | ❌ No                             | ❌ No                       |
 | **License**                      | CC BY-NC 4.0 (open source)            | Commercial SaaS (closed)     | Open Source (Apache 2.0)         | Open Source (BSD 3-Clause) |
 
@@ -86,8 +86,6 @@ This makes EidosDB ideal for agents that need evolving symbolic knowledge, such 
 * **WebSocket reinforcement stream**
   Send real-time reinforcement events through `ws://localhost:3000/reinforce-stream` using JSON payloads.
 
-* **Interactive real-time dashboard**
-  Observe symbolic metrics live at `http://localhost:3000/dashboard`, now with an embedded browser and memory heatmap for exploration.
 
 * **API rate limiting & usage tracking**
   Requests are limited per API key and total daily usage is monitored.
@@ -126,7 +124,6 @@ EidosDB is ideal for:
    npx ts-node src/api/server.ts
    ```
 4. Access API on [http://localhost:3000](http://localhost:3000)
-5. Open the interactive dashboard (embedded browser + memory heatmap) at [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 Endpoints include:
 
@@ -284,7 +281,7 @@ We have a roadmap for enhancing EidosDB including:
 
 * Integration with real semantic models for generating `vector`s
 * Symbolic clustering, context-aware snapshots
-* GUI dashboard, real-time reinforcement streams, and more
+* Real-time reinforcement streams, and more
 
 We welcome contributors! See the `TODO.md` for high-level tasks and issue ideas.
 
@@ -303,14 +300,6 @@ Feel free to contribute or reach out via GitHub or email if you're interested in
 EidosDB is **not just a database**—it’s a **memory engine for symbolic intelligence**. It models ideas as entities that *live, fade, and grow* within their context—opening new possibilities in cognitive AI and knowledge modeling.
 
 Try it, experiment, and join the symbolic memory movement!
-
----
-
-## 🎯 Demo & Showcase
-
-Coming soon: interactive web demo of EidosDB with symbolic ideas, live decay, and memory exploration UI.
-
-> Want to try it early? Reach out or clone the repo and activate `/dashboard`.
 
 ---
 

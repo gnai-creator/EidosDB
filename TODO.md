@@ -19,7 +19,6 @@
 * [x] Loop de decay com suporte a GPU (opcional)
 * [x] Licença CC BY-NC 4.0 + validador
 * [x] Sistema de chaves de API com tiers
-* [x] Dashboard de monitoramento simbólico
 * [x] Adapter opcional REST → GraphQL
 
 ---
