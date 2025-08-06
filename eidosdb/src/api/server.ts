@@ -14,7 +14,8 @@ import type { SemanticIdea } from "../core/symbolicTypes";
 import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 import { validarLicenca } from "../utils/license";
-import { obterTier, limitesPorTier } from "../utils/apiKey";
+import crypto from "crypto";
+import { obterTier, limitesPorTier, adicionarChave } from "../utils/apiKey";
 import { registrarUso, obterUso } from "../utils/usageTracker";
 
 validarLicenca();
@@ -40,6 +41,18 @@ store
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Rota para criação de nova chave de API
+app.post("/api/keys", (req: Request, res: Response) => {
+  const auth = req.header("authorization");
+  if (!auth || !auth.startsWith("Bearer ")) {
+    return res.status(401).send("Token de usuário ausente ou inválido");
+  }
+  const tier = typeof req.body?.tier === "string" ? req.body.tier : "basic";
+  const novaChave = crypto.randomBytes(16).toString("hex");
+  adicionarChave(novaChave, tier);
+  res.status(201).json({ key: novaChave });
+});
 
 // Middleware de autenticação por chave de API
 app.use((req, res, next) => {

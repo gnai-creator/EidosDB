@@ -20,6 +20,12 @@ export function obterTier(chave: string): string | undefined {
   return chaves[chave];
 }
 
+/** Adiciona uma nova chave de API e persiste no arquivo. */
+export function adicionarChave(chave: string, tier: string): void {
+  chaves[chave] = tier;
+  fs.writeFileSync(caminho, JSON.stringify(chaves, null, 2));
+}
+
 /** Limites de requisições por minuto para cada tier. */
 export const limitesPorTier: Record<string, number> = {
   basic: 5,

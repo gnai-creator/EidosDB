@@ -1,7 +1,13 @@
 import request from 'supertest';
 import { app, server } from '../src/api/server';
+import fs from 'fs';
+import path from 'path';
+
+const keyFile = path.join(__dirname, '..', 'data', 'api-keys.json');
+const originalKeys = fs.readFileSync(keyFile, 'utf-8');
 
 afterAll((done) => {
+  fs.writeFileSync(keyFile, originalKeys);
   server.close(done);
 });
 
@@ -22,5 +28,15 @@ describe('API Key system', () => {
     }
     const res = await request(app).get('/dump').set('x-api-key', 'rate-limit-key');
     expect(res.status).toBe(429);
+  });
+
+  it('gera nova chave e permite uso imediato', async () => {
+    const resKey = await request(app)
+      .post('/api/keys')
+      .set('Authorization', 'Bearer test');
+    expect(resKey.status).toBe(201);
+    const nova = resKey.body.key;
+    const res = await request(app).get('/dump').set('x-api-key', nova);
+    expect(res.status).toBe(200);
   });
 });
