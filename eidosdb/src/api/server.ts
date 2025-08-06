@@ -13,6 +13,7 @@ import { MemoryStore } from "../storage/memoryStore";
 import type { StorageAdapter } from "../storage/storageAdapter";
 import type { SemanticIdea } from "../core/symbolicTypes";
 import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
+import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 
 const app = express();
 
@@ -46,6 +47,11 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Configuração opcional do endpoint GraphQL (/graphql)
+if (process.env.EIDOS_GRAPHQL === "true") {
+  setupGraphQL(app, store);
+}
 
 // Rota para servir o painel de monitoramento em tempo real
 app.get("/dashboard", (_req: Request, res: Response) => {
