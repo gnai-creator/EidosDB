@@ -15,6 +15,7 @@ import type { SemanticIdea } from "../core/symbolicTypes";
 import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 import { validarLicenca } from "../utils/license";
+import { obterTier, limitesPorTier } from "../utils/apiKey";
 
 validarLicenca();
 const app = express();
@@ -40,10 +41,27 @@ store
 app.use(cors());
 app.use(bodyParser.json());
 
-// Limitador de taxa para evitar abuso: 100 requisições por minuto por IP
+// Middleware de autenticação por chave de API
+app.use((req, res, next) => {
+  const chave = req.header("x-api-key");
+  const tier = chave ? obterTier(chave) : undefined;
+  if (!tier) {
+    return res.status(401).send("Chave de API ausente ou inválida");
+  }
+  // Armazena informações para uso posterior
+  (req as any).tier = tier;
+  (req as any).apiKey = chave;
+  next();
+});
+
+// Limitador de taxa baseado no tier da chave de API
 const limiter = rateLimit({
   windowMs: 60 * 1000, // Janela de 1 minuto
-  max: 100, // Máximo de 100 requisições por IP
+  max: (req) => {
+    const tier = (req as any).tier as string;
+    return limitesPorTier[tier] || 0;
+  },
+  keyGenerator: (req) => (req as any).apiKey,
   standardHeaders: true, // Usa cabeçalhos RateLimit-*
   legacyHeaders: false, // Desativa cabeçalhos X-RateLimit-*
 });
@@ -153,7 +171,13 @@ const server = createServer(app);
 // Servidor WebSocket para reforço baseado em fluxo
 // Clientes enviam mensagens JSON `{ id: string, factor?: number }`
 const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
-wss.on("connection", (socket: WebSocket) => {
+wss.on("connection", (socket: WebSocket, request) => {
+  const chave = request.headers["x-api-key"] as string | undefined;
+  const tier = chave ? obterTier(chave) : undefined;
+  if (!tier) {
+    socket.close();
+    return;
+  }
   // Lidar com eventos de reforço de entrada
   socket.on("message", async (data: RawData) => {
     try {
@@ -176,7 +200,13 @@ wss.on("connection", (socket: WebSocket) => {
 
 // Servidor WebSocket para envio contínuo de métricas simbólicas
 const metricsWss = new WebSocketServer({ server, path: "/metrics-stream" });
-metricsWss.on("connection", (socket: WebSocket) => {
+metricsWss.on("connection", (socket: WebSocket, request) => {
+  const chave = request.headers["x-api-key"] as string | undefined;
+  const tier = chave ? obterTier(chave) : undefined;
+  if (!tier) {
+    socket.close();
+    return;
+  }
   // Função que calcula e envia métricas atuais
   const enviarMetricas = async () => {
     const snapshot = await store.snapshot();
@@ -195,3 +225,5 @@ const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`🧠 EidosDB API listening on http://localhost:${PORT}`);
 });
+
+export { app, server };
