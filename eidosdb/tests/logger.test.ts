@@ -15,6 +15,7 @@ function createIdea(
     w,
     r,
     context,
+    userId: 'u1',
   };
 }
 

@@ -9,7 +9,7 @@ import type { StorageAdapter } from "./storageAdapter";
  * Armazenamento simbólico em memória.
  */
 export class MemoryStore implements StorageAdapter {
-  private memory: SemanticIdea[] = [];
+  private memory: Map<string, SemanticIdea[]> = new Map();
   private readonly decayFactor: number = 0.95; // 5% de perda por tick
   private readonly minW: number = 1e-6; // Valor mínimo simbólico
 
@@ -18,10 +18,15 @@ export class MemoryStore implements StorageAdapter {
    */
   private cleanupExpired(): void {
     const now = Date.now();
-    this.memory = this.memory.filter((idea) => {
-      if (idea.ttl === undefined || idea.timestamp === undefined) return true;
-      return idea.timestamp + idea.ttl > now;
-    });
+    for (const [user, ideas] of this.memory) {
+      this.memory.set(
+        user,
+        ideas.filter((idea) => {
+          if (idea.ttl === undefined || idea.timestamp === undefined) return true;
+          return idea.timestamp + idea.ttl > now;
+        }),
+      );
+    }
   }
 
   /**
@@ -29,19 +34,27 @@ export class MemoryStore implements StorageAdapter {
    */
   async tick(): Promise<void> {
     this.cleanupExpired();
-    this.memory = this.memory.map((idea) => ({
-      ...idea,
-      w: Math.max(idea.w * this.decayFactor, this.minW),
-    }));
+    for (const [user, ideas] of this.memory) {
+      this.memory.set(
+        user,
+        ideas.map((idea) => ({
+          ...idea,
+          w: Math.max(idea.w * this.decayFactor, this.minW),
+        })),
+      );
+    }
   }
 
   /**
    * Reestimula uma ideia simbólica, mantendo-a viva.
    */
-  async reinforce(id: string, factor: number = 1.1): Promise<void> {
+  async reinforce(userId: string, id: string, factor: number = 1.1): Promise<void> {
     this.cleanupExpired();
-    this.memory = this.memory.map((idea) =>
-      idea.id === id ? { ...idea, w: idea.w * factor } : idea
+    const ideas = this.memory.get(userId);
+    if (!ideas) return;
+    this.memory.set(
+      userId,
+      ideas.map((idea) => (idea.id === id ? { ...idea, w: idea.w * factor } : idea)),
     );
   }
 
@@ -50,14 +63,21 @@ export class MemoryStore implements StorageAdapter {
    */
   async save(filePath?: string): Promise<void> {
     this.cleanupExpired();
-    saveToDisk(this.memory, filePath);
+    const allIdeas = Array.from(this.memory.values()).flat();
+    saveToDisk(allIdeas, filePath);
   }
 
   /**
    * Carrega dados do disco, substituindo a memória atual.
    */
   async load(filePath?: string): Promise<void> {
-    this.memory = loadFromDisk(filePath);
+    const loaded = loadFromDisk(filePath);
+    this.memory.clear();
+    for (const idea of loaded) {
+      const arr = this.memory.get(idea.userId) ?? [];
+      arr.push(idea);
+      this.memory.set(idea.userId, arr);
+    }
     this.cleanupExpired();
   }
 
@@ -69,7 +89,9 @@ export class MemoryStore implements StorageAdapter {
     if (!idea.timestamp) {
       idea.timestamp = Date.now();
     }
-    this.memory.push(idea);
+    const arr = this.memory.get(idea.userId) ?? [];
+    arr.push(idea);
+    this.memory.set(idea.userId, arr);
   }
 
   /**
@@ -77,11 +99,12 @@ export class MemoryStore implements StorageAdapter {
    */
   async query(
     w: number,
-    c: number = DEFAULT_C,
-    selectors: QuerySelectors = {}
+    selectors: QuerySelectors,
+    c: number = DEFAULT_C
   ): Promise<(SemanticIdea & { v: number })[]> {
     this.cleanupExpired();
-    return this.memory
+    const ideas = this.memory.get(selectors.userId) ?? [];
+    return ideas
       .filter((idea) => {
         if (selectors.context && idea.context !== selectors.context) return false;
 
@@ -115,22 +138,39 @@ export class MemoryStore implements StorageAdapter {
    * Limpa a memória simbólica.
    */
   async clear(): Promise<void> {
-    this.memory.length = 0;
+    this.memory.clear();
   }
 
   /**
    * Cria um snapshot profundo da memória atual.
    */
-  async snapshot(): Promise<SemanticIdea[]> {
+  async snapshot(userId?: string): Promise<SemanticIdea[]> {
     this.cleanupExpired();
-    return this.memory.map((idea) => ({ ...idea }));
+    if (userId) {
+      return (this.memory.get(userId) ?? []).map((idea) => ({ ...idea }));
+    }
+    return Array.from(this.memory.values())
+      .flat()
+      .map((idea) => ({ ...idea }));
   }
 
   /**
    * Restaura o estado da memória a partir de um snapshot.
    */
-  async restore(snapshot: SemanticIdea[]): Promise<void> {
-    this.memory = snapshot.map((idea) => ({ ...idea }));
+  async restore(snapshot: SemanticIdea[], userId?: string): Promise<void> {
+    if (userId) {
+      this.memory.set(
+        userId,
+        snapshot.map((idea) => ({ ...idea, userId })),
+      );
+    } else {
+      this.memory.clear();
+      for (const idea of snapshot) {
+        const arr = this.memory.get(idea.userId) ?? [];
+        arr.push({ ...idea });
+        this.memory.set(idea.userId, arr);
+      }
+    }
     this.cleanupExpired();
   }
 }

@@ -10,13 +10,24 @@ describe('Usage tracker', () => {
   });
 
   it('bloqueia chave após exceder o limite', () => {
-    // limite pequeno para facilitar o teste
     expect(registrarUso('test', 2)).toBe(true);
     expect(registrarUso('test', 2)).toBe(true);
-    // Terceira chamada deve ultrapassar o limite e retornar false
     expect(registrarUso('test', 2)).toBe(false);
-    // Uso acumulado deve refletir as duas chamadas permitidas
-    expect(obterUso('test')).toBe(2);
+    expect(obterUso('test')).toEqual({
+      requests: 2,
+      reinforcements: 0,
+      decays: 0,
+    });
+  });
+
+  it('contabiliza reforços e decays', () => {
+    registrarUso('k', undefined, 'reinforce');
+    registrarUso('k', undefined, 'decay');
+    expect(obterUso('k')).toEqual({
+      requests: 0,
+      reinforcements: 1,
+      decays: 1,
+    });
   });
 });
 

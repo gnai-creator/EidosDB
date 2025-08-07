@@ -61,14 +61,15 @@ export class SQLiteStore implements StorageAdapter {
    */
   async query(
     w: number,
-    c: number = DEFAULT_C,
-    selectors: QuerySelectors = {}
+    selectors: QuerySelectors,
+    c: number = DEFAULT_C
   ): Promise<(SemanticIdea & { v: number })[]> {
     this.cleanupExpired();
     const rows = this.db.prepare("SELECT data FROM ideas").all();
     const ideas: SemanticIdea[] = rows.map((r: any) => JSON.parse(r.data));
     return ideas
       .filter((idea) => {
+        if (idea.userId !== selectors.userId) return false;
         if (selectors.context && idea.context !== selectors.context) return false;
 
         if (selectors.tags && selectors.tags.length > 0) {
@@ -113,13 +114,14 @@ export class SQLiteStore implements StorageAdapter {
   /**
    * Reforça uma ideia.
    */
-  async reinforce(id: string, factor: number = 1.1): Promise<void> {
+  async reinforce(userId: string, id: string, factor: number = 1.1): Promise<void> {
     this.cleanupExpired();
     const row = this.db
       .prepare("SELECT data FROM ideas WHERE id = ?")
       .get(id) as any;
     if (!row) return;
     const idea: SemanticIdea = JSON.parse(row.data);
+    if (idea.userId !== userId) return;
     idea.w = idea.w * factor;
     this.db
       .prepare("UPDATE ideas SET data = ? WHERE id = ?")
@@ -152,23 +154,44 @@ export class SQLiteStore implements StorageAdapter {
   /**
    * Retorna snapshot completo.
    */
-  async snapshot(): Promise<SemanticIdea[]> {
+  async snapshot(userId?: string): Promise<SemanticIdea[]> {
     this.cleanupExpired();
     const rows = this.db.prepare("SELECT data FROM ideas").all();
-    return rows.map((r: any) => JSON.parse(r.data));
+    const ideas = rows.map((r: any) => JSON.parse(r.data));
+    if (userId) return ideas.filter((i: SemanticIdea) => i.userId === userId);
+    return ideas;
   }
 
   /**
    * Restaura estado a partir de snapshot.
    */
-  async restore(snapshot: SemanticIdea[]): Promise<void> {
-    const insert = this.db.prepare(
-      "INSERT OR REPLACE INTO ideas (id, data) VALUES (?, ?)"
-    );
-    const trx = this.db.transaction((ideas: SemanticIdea[]) => {
-      this.db.prepare("DELETE FROM ideas").run();
-      ideas.forEach((idea) => insert.run(idea.id, JSON.stringify(idea)));
-    });
-    trx(snapshot);
+  async restore(snapshot: SemanticIdea[], userId?: string): Promise<void> {
+    if (userId) {
+      const rows = this.db.prepare("SELECT id, data FROM ideas").all();
+      const toRemove: string[] = [];
+      rows.forEach((row: any) => {
+        const idea: SemanticIdea = JSON.parse(row.data);
+        if (idea.userId === userId) toRemove.push(row.id);
+      });
+      if (toRemove.length) {
+        const stmt = this.db.prepare(
+          `DELETE FROM ideas WHERE id IN (${toRemove.map(() => "?").join(",")})`,
+        );
+        stmt.run(...toRemove);
+      }
+      const insert = this.db.prepare(
+        "INSERT OR REPLACE INTO ideas (id, data) VALUES (?, ?)",
+      );
+      snapshot.forEach((idea) => insert.run(idea.id, JSON.stringify({ ...idea, userId })));
+    } else {
+      const insert = this.db.prepare(
+        "INSERT OR REPLACE INTO ideas (id, data) VALUES (?, ?)",
+      );
+      const trx = this.db.transaction((ideas: SemanticIdea[]) => {
+        this.db.prepare("DELETE FROM ideas").run();
+        ideas.forEach((idea) => insert.run(idea.id, JSON.stringify(idea)));
+      });
+      trx(snapshot);
+    }
   }
 }

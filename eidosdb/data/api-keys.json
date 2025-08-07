@@ -1,5 +1,9 @@
 {
-  "basic-key": "basic",
-  "premium-key": "premium",
-  "rate-limit-key": "basic"
+  "test@example.com": {
+    "basic-key": "free",
+    "rate-limit-key": "free"
+  },
+  "7002d398-cf68-4c2d-aaed-b7b74be31b9e": {
+    "bc2d5752e2b7b1b78f0ea9be6dbe5e4c": "premium"
+  }
 }

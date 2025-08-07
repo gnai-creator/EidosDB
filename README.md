@@ -138,14 +138,18 @@ Endpoints include:
 
 ### API keys and tiers
 
-All HTTP requests require an `x-api-key` header. Keys are defined in `eidosdb/data/api-keys.json` and map to access tiers.
+All HTTP requests require an `x-api-key` header. Keys are grouped by user in
+`eidosdb/data/api-keys.json`. Each user identifier (decoded from the JWT `sub`
+or `email`) maps to its API keys and tiers.
 
 Example of key file:
 
 ```json
 {
-  "basic-key": "basic",
-  "premium-key": "premium"
+  "user@example.com": {
+    "basic-key": "free",
+    "premium-key": "premium"
+  }
 }
 ```
 

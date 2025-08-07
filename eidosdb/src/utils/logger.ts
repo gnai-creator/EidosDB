@@ -70,10 +70,11 @@ export function computeSymbolicMetrics(
  * Faz log das métricas simbólicas atuais do armazenamento.
  */
 export async function logSymbolicMetrics(
-  provider: { snapshot: () => Promise<SemanticIdea[]> },
+  provider: { snapshot: (userId?: string) => Promise<SemanticIdea[]> },
+  userId?: string,
   c: number = DEFAULT_C,
 ): Promise<void> {
-  const snapshot = await provider.snapshot();
+  const snapshot = await provider.snapshot(userId);
   const metrics = computeSymbolicMetrics(snapshot, c);
   console.log(
     `📊 v médio: ${metrics.averageV.toFixed(4)} | cluster dominante: ${

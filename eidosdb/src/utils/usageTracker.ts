@@ -5,7 +5,9 @@
 const LIMITE_PADRAO = parseInt(process.env.USAGE_LIMIT || "10000", 10);
 
 interface RegistroUso {
-  contador: number; // número de requisições
+  requests: number; // número de requisições
+  reinforcements: number; // número de reforços
+  decays: number; // número de decays
   reinicio: number; // momento em que o contador será reiniciado
 }
 
@@ -18,7 +20,11 @@ const bloqueadas: Set<string> = new Set();
  * Registra uma requisição para a chave informada.
  * Retorna false se a chave estiver bloqueada ou se exceder o limite diário.
  */
-export function registrarUso(chave: string, limite = LIMITE_PADRAO): boolean {
+export function registrarUso(
+  chave: string,
+  limite = LIMITE_PADRAO,
+  tipo: 'request' | 'reinforce' | 'decay' = 'request',
+): boolean {
   if (bloqueadas.has(chave)) return false;
 
   const agora = Date.now();
@@ -26,31 +32,52 @@ export function registrarUso(chave: string, limite = LIMITE_PADRAO): boolean {
 
   // Reinicia o contador caso o período de 24h tenha expirado
   if (!registro || agora > registro.reinicio) {
-    registro = { contador: 0, reinicio: agora + 24 * 60 * 60 * 1000 };
+    registro = {
+      requests: 0,
+      reinforcements: 0,
+      decays: 0,
+      reinicio: agora + 24 * 60 * 60 * 1000,
+    };
   }
 
-  // Verifica se a próxima requisição ultrapassa o limite
-  if (registro.contador + 1 > limite) {
-    bloqueadas.add(chave);
-    uso.set(chave, registro);
-    return false; // excedeu o limite diário
+  if (tipo === 'request') {
+    // Verifica se a próxima requisição ultrapassa o limite
+    if (registro.requests + 1 > limite) {
+      bloqueadas.add(chave);
+      uso.set(chave, registro);
+      return false; // excedeu o limite diário
+    }
+    registro.requests++;
+  } else if (tipo === 'reinforce') {
+    registro.reinforcements++;
+  } else if (tipo === 'decay') {
+    registro.decays++;
   }
 
-  registro.contador++;
   uso.set(chave, registro);
-  return true; // requisição permitida
+  return true; // operação permitida
 }
 
 /**
  * Obtém o uso acumulado. Se nenhuma chave for fornecida, retorna todas.
  */
-export function obterUso(chave?: string): Record<string, number> | number {
+export function obterUso(
+  chave?: string,
+): Record<string, { requests: number; reinforcements: number; decays: number }> |
+  { requests: number; reinforcements: number; decays: number } {
   if (chave) {
-    return uso.get(chave)?.contador || 0;
+    const r = uso.get(chave);
+    return r
+      ? { requests: r.requests, reinforcements: r.reinforcements, decays: r.decays }
+      : { requests: 0, reinforcements: 0, decays: 0 };
   }
-  const resumo: Record<string, number> = {};
+  const resumo: Record<string, { requests: number; reinforcements: number; decays: number }> = {};
   uso.forEach((r, k) => {
-    resumo[k] = r.contador;
+    resumo[k] = {
+      requests: r.requests,
+      reinforcements: r.reinforcements,
+      decays: r.decays,
+    };
   });
   return resumo;
 }

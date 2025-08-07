@@ -15,6 +15,7 @@ describe("GraphQL adapter", () => {
       w: 0.2,
       r: 0.3,
       context: "ctx",
+      userId: "u1",
     };
     await graphql({
       schema,
@@ -25,7 +26,7 @@ describe("GraphQL adapter", () => {
     const result = await graphql({
       schema,
       rootValue: root,
-      source: `{ ideas(w:0.2){ id label } }`,
+      source: `{ ideas(w:0.2, userId:"u1"){ id label } }`,
     });
     expect(result.data?.ideas[0].id).toBe("1");
   });

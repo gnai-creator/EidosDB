@@ -15,8 +15,17 @@ import { logSymbolicMetrics, computeSymbolicMetrics } from "../utils/logger";
 import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 import { validarLicenca } from "../utils/license";
 import crypto from "crypto";
-import { obterTier, limitesPorTier, adicionarChave } from "../utils/apiKey";
+import { generateEmbedding } from "../semantic/embedding";
+import {
+  obterTier,
+  obterUsuarioDaChave,
+  limitesPorTier,
+  limitesDiariosPorTier,
+  adicionarChave,
+  listarChaves,
+} from "../utils/apiKey";
 import { registrarUso, obterUso } from "../utils/usageTracker";
+import { createClient } from "@supabase/supabase-js";
 
 validarLicenca();
 const app = express();
@@ -42,16 +51,58 @@ store
 app.use(cors());
 app.use(bodyParser.json());
 
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null;
+
+async function obterUsuario(auth: string): Promise<string | null> {
+  const token = auth.split(" ")[1];
+  if (!token) return null;
+  if (!supabaseAdmin) {
+    try {
+      const payloadPart = token.split(".")[1];
+      const payload = JSON.parse(
+        Buffer.from(payloadPart, "base64url").toString("utf8")
+      );
+      return payload.sub || payload.email || null;
+    } catch {
+      return null;
+    }
+  }
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  return !error && data.user ? data.user.id : null;
+}
+
 // Rota para criação de nova chave de API
-app.post("/api/keys", (req: Request, res: Response) => {
+app.post("/api/keys", async (req: Request, res: Response) => {
   const auth = req.header("authorization");
   if (!auth || !auth.startsWith("Bearer ")) {
     return res.status(401).send("Token de usuário ausente ou inválido");
   }
-  const tier = typeof req.body?.tier === "string" ? req.body.tier : "basic";
+  const user = await obterUsuario(auth);
+  if (!user) {
+    return res.status(401).send("Token inválido");
+  }
+  const tier = typeof req.body?.tier === "string" ? req.body.tier : "free";
   const novaChave = crypto.randomBytes(16).toString("hex");
-  adicionarChave(novaChave, tier);
+  adicionarChave(user, novaChave, tier);
   res.status(201).json({ key: novaChave });
+});
+
+// Lista todas as chaves cadastradas (requer token de usuário)
+app.get("/api/keys", async (req: Request, res: Response) => {
+  const auth = req.header("authorization");
+  if (!auth || !auth.startsWith("Bearer ")) {
+    return res.status(401).send("Token de usuário ausente ou inválido");
+  }
+  const user = await obterUsuario(auth);
+  if (!user) {
+    return res.status(401).send("Token inválido");
+  }
+  res.json(listarChaves(user));
 });
 
 // Middleware de autenticação por chave de API
@@ -64,14 +115,16 @@ app.use((req, res, next) => {
   // Armazena informações para uso posterior
   (req as any).tier = tier;
   (req as any).apiKey = chave;
+  (req as any).userId = chave ? obterUsuarioDaChave(chave) : undefined;
   next();
 });
 
 // Rastreamento de uso por chave e bloqueio simples contra abuso
 app.use((req, res, next) => {
   const chave = (req as any).apiKey as string;
+  const tier = (req as any).tier as string;
   // registrarUso retorna false caso o limite diário tenha sido excedido
-  if (!registrarUso(chave)) {
+  if (!registrarUso(chave, limitesDiariosPorTier[tier])) {
     return res.status(429).send("Limite diário de uso excedido");
   }
   next();
@@ -127,7 +180,9 @@ app.get("/query", async (req: Request, res: Response) => {
     }
   }
 
-  const result = await store.query(w, c, { context, tags, metadata });
+  const userId = (req as any).userId as string;
+  if (!userId) return res.status(401).send("User not resolved");
+  const result = await store.query(w, { userId, context, tags, metadata }, c);
   res.json(result);
 });
 
@@ -139,15 +194,27 @@ app.post("/insert", async (req: Request<{}, {}, SemanticIdea>, res: Response) =>
     return res.status(400).send("Invalid DataPoint format");
   }
 
+  const userId = (req as any).userId as string;
+  if (!userId) return res.status(401).send("User not resolved");
+  data.userId = userId;
+  if (!data.vector || data.vector.length === 0) {
+    try {
+      data.vector = await generateEmbedding(data.label);
+    } catch (err) {
+      console.error("Embedding generation failed", err);
+      return res.status(500).send("Embedding generation failed");
+    }
+  }
   await store.insert(data);
-  await logSymbolicMetrics(store);
+  await logSymbolicMetrics(store, userId);
   res.sendStatus(201);
 });
 
 // Tick de decaimento
-app.post("/tick", async (_req: Request, res: Response) => {
+app.post("/tick", async (req: Request, res: Response) => {
+  registrarUso((req as any).apiKey, undefined, "decay");
   await store.tick();
-  await logSymbolicMetrics(store);
+  await logSymbolicMetrics(store, (req as any).userId);
   res.send("Tick applied");
 });
 
@@ -155,14 +222,19 @@ app.post("/tick", async (_req: Request, res: Response) => {
 app.post("/reinforce", async (req: Request, res: Response) => {
   const { id, factor } = req.body;
   if (!id) return res.status(400).send("Missing 'id'");
-  await store.reinforce(id, factor || 1.1);
-  await logSymbolicMetrics(store);
+  registrarUso((req as any).apiKey, undefined, "reinforce");
+  const userId = (req as any).userId as string;
+  if (!userId) return res.status(401).send("User not resolved");
+  await store.reinforce(userId, id, factor || 1.1);
+  await logSymbolicMetrics(store, userId);
   res.send("Reinforced");
 });
 
 // Dump/Snapshot da memória atual
 app.get("/dump", async (_req: Request, res: Response) => {
-  const snap = await store.snapshot();
+  const userId = (_req as any).userId as string;
+  if (!userId) return res.status(401).send("User not resolved");
+  const snap = await store.snapshot(userId);
   res.json(snap);
 });
 
@@ -172,7 +244,9 @@ app.post("/restore", async (req: Request, res: Response) => {
   if (!Array.isArray(snapshot)) {
     return res.status(400).send("Invalid snapshot format");
   }
-  await store.restore(snapshot);
+  const userId = (req as any).userId as string;
+  if (!userId) return res.status(401).send("User not resolved");
+  await store.restore(snapshot, userId);
   res.send("Snapshot restored");
 });
 
@@ -197,7 +271,8 @@ const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
 wss.on("connection", (socket: WebSocket, request) => {
   const chave = request.headers["x-api-key"] as string | undefined;
   const tier = chave ? obterTier(chave) : undefined;
-  if (!tier) {
+  const userId = chave ? obterUsuarioDaChave(chave) : undefined;
+  if (!tier || !userId) {
     socket.close();
     return;
   }
@@ -210,7 +285,7 @@ wss.on("connection", (socket: WebSocket, request) => {
         return;
       }
       // Aplicar reforço usando fator fornecido ou padrão
-      await store.reinforce(id, typeof factor === "number" ? factor : 1.1);
+      await store.reinforce(userId, id, typeof factor === "number" ? factor : 1.1);
       socket.send(JSON.stringify({ status: "ok" }));
     } catch (err) {
       // Notificar o cliente sobre cargas malformadas ou erros internos
@@ -226,13 +301,14 @@ const metricsWss = new WebSocketServer({ server, path: "/metrics-stream" });
 metricsWss.on("connection", (socket: WebSocket, request) => {
   const chave = request.headers["x-api-key"] as string | undefined;
   const tier = chave ? obterTier(chave) : undefined;
-  if (!tier) {
+  const userId = chave ? obterUsuarioDaChave(chave) : undefined;
+  if (!tier || !userId) {
     socket.close();
     return;
   }
   // Função que calcula e envia métricas atuais
   const enviarMetricas = async () => {
-    const snapshot = await store.snapshot();
+    const snapshot = await store.snapshot(userId);
     const metrics = computeSymbolicMetrics(snapshot);
     socket.send(JSON.stringify(metrics));
   };

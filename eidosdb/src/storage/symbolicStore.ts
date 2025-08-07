@@ -16,18 +16,18 @@ export class EidosStore {
 
   query(
     w: number,
-    c?: number,
-    selectors?: QuerySelectors
+    selectors: QuerySelectors,
+    c?: number
   ): Promise<(SemanticIdea & { v: number })[]> {
-    return this.adapter.query(w, c, selectors);
+    return this.adapter.query(w, selectors, c);
   }
 
   tick(): Promise<void> {
     return this.adapter.tick();
   }
 
-  reinforce(id: string, factor?: number): Promise<void> {
-    return this.adapter.reinforce(id, factor);
+  reinforce(userId: string, id: string, factor?: number): Promise<void> {
+    return this.adapter.reinforce(userId, id, factor);
   }
 
   save(filePath?: string): Promise<void> {
@@ -42,11 +42,11 @@ export class EidosStore {
     return this.adapter.clear();
   }
 
-  snapshot(): Promise<SemanticIdea[]> {
-    return this.adapter.snapshot();
+  snapshot(userId?: string): Promise<SemanticIdea[]> {
+    return this.adapter.snapshot(userId);
   }
 
-  restore(snapshot: SemanticIdea[]): Promise<void> {
-    return this.adapter.restore(snapshot);
+  restore(snapshot: SemanticIdea[], userId?: string): Promise<void> {
+    return this.adapter.restore(snapshot, userId);
   }
 }

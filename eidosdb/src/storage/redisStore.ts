@@ -56,8 +56,8 @@ export class RedisStore implements StorageAdapter {
    */
   async query(
     w: number,
-    c: number = DEFAULT_C,
-    selectors: QuerySelectors = {}
+    selectors: QuerySelectors,
+    c: number = DEFAULT_C
   ): Promise<(SemanticIdea & { v: number })[]> {
     await this.cleanupExpired();
     const ids = await this.client.sMembers("ideas:ids");
@@ -70,6 +70,7 @@ export class RedisStore implements StorageAdapter {
     });
     return ideas
       .filter((idea) => {
+        if (idea.userId !== selectors.userId) return false;
         if (selectors.context && idea.context !== selectors.context) return false;
 
         if (selectors.tags && selectors.tags.length > 0) {
@@ -115,11 +116,12 @@ export class RedisStore implements StorageAdapter {
   /**
    * Reforça uma ideia específica.
    */
-  async reinforce(id: string, factor: number = 1.1): Promise<void> {
+  async reinforce(userId: string, id: string, factor: number = 1.1): Promise<void> {
     await this.cleanupExpired();
     const raw = await this.client.get(`idea:${id}`);
     if (!raw) return;
     const idea: SemanticIdea = JSON.parse(raw);
+    if (idea.userId !== userId) return;
     idea.w = idea.w * factor;
     await this.client.set(`idea:${id}`, JSON.stringify(idea));
   }
@@ -155,7 +157,7 @@ export class RedisStore implements StorageAdapter {
   /**
    * Retorna um snapshot completo.
    */
-  async snapshot(): Promise<SemanticIdea[]> {
+  async snapshot(userId?: string): Promise<SemanticIdea[]> {
     await this.cleanupExpired();
     const ids = await this.client.sMembers("ideas:ids");
     if (ids.length === 0) return [];
@@ -165,17 +167,35 @@ export class RedisStore implements StorageAdapter {
     raws.forEach((raw) => {
       if (raw) ideas.push(JSON.parse(raw));
     });
+    if (userId) return ideas.filter((i) => i.userId === userId);
     return ideas;
   }
 
   /**
    * Restaura estado a partir de um snapshot.
    */
-  async restore(snapshot: SemanticIdea[]): Promise<void> {
-    await this.clear();
-    for (const idea of snapshot) {
-      await this.client.set(`idea:${idea.id}`, JSON.stringify(idea));
-      await this.client.sAdd("ideas:ids", idea.id);
+  async restore(snapshot: SemanticIdea[], userId?: string): Promise<void> {
+    await this.cleanupExpired();
+    if (userId) {
+      const ids = await this.client.sMembers("ideas:ids");
+      for (const id of ids) {
+        const raw = await this.client.get(`idea:${id}`);
+        if (!raw) continue;
+        const idea: SemanticIdea = JSON.parse(raw);
+        if (idea.userId === userId) {
+          await this.client.del(`idea:${id}`);
+          await this.client.sRem("ideas:ids", id);
+        }
+      }
+      for (const idea of snapshot) {
+        await this.insert({ ...idea, userId });
+      }
+    } else {
+      await this.clear();
+      for (const idea of snapshot) {
+        await this.client.set(`idea:${idea.id}`, JSON.stringify(idea));
+        await this.client.sAdd("ideas:ids", idea.id);
+      }
     }
   }
 }

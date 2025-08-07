@@ -9,14 +9,14 @@ export interface StorageAdapter {
   insert(idea: SemanticIdea): Promise<void>;
   query(
     w: number,
-    c?: number,
-    selectors?: QuerySelectors
+    selectors: QuerySelectors,
+    c?: number
   ): Promise<(SemanticIdea & { v: number })[]>;
   tick(): Promise<void>;
-  reinforce(id: string, factor?: number): Promise<void>;
+  reinforce(userId: string, id: string, factor?: number): Promise<void>;
   save(filePath?: string): Promise<void>;
   load(filePath?: string): Promise<void>;
   clear(): Promise<void>;
-  snapshot(): Promise<SemanticIdea[]>;
-  restore(snapshot: SemanticIdea[]): Promise<void>;
+  snapshot(userId?: string): Promise<SemanticIdea[]>;
+  restore(snapshot: SemanticIdea[], userId?: string): Promise<void>;
 }

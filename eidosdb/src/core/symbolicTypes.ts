@@ -3,9 +3,10 @@
 export interface SemanticIdea {
   id: string; // Hash simbólico único
   label: string; // Texto da ideia (ex: "tempo é ilusão")
-  vector: number[]; // Embedding semântico (ex: 128 floats)
+  vector: number[]; // Embedding semântico (tamanho depende do modelo)
   w: number; // Frequência simbólica (atenção)
   r: number; // Distância simbólica (contexto)
+  userId: string; // Identificador do usuário (chave de partição)
   context: string; // Nome do cluster (ex: "futuro", "medo")
   timestamp?: number; // Momento de inserção ou ativação
   ttl?: number; // Tempo de vida em ms antes de expirar
@@ -25,6 +26,7 @@ export interface EvaluatedIdea extends SemanticIdea {
 }
 
 export interface QuerySelectors {
+  userId: string; // Chave obrigatória de partição do usuário
   context?: string;
   metadata?: Record<string, any>;
   tags?: string[];

@@ -50,6 +50,7 @@ export function createSchema(store: EidosStore) {
       vector: [Float!]!
       w: Float!
       r: Float!
+      userId: String!
       context: String!
       timestamp: Float
       ttl: Float
@@ -64,6 +65,7 @@ export function createSchema(store: EidosStore) {
       vector: [Float!]!
       w: Float!
       r: Float!
+      userId: String!
       context: String!
       timestamp: Float
       ttl: Float
@@ -72,15 +74,15 @@ export function createSchema(store: EidosStore) {
     }
 
     type Query {
-      ideas(w: Float!, c: Float, context: String, tags: [String], metadata: JSON): [SemanticIdea!]!
-      dump: [SemanticIdea!]!
+      ideas(w: Float!, c: Float, userId: String!, context: String, tags: [String], metadata: JSON): [SemanticIdea!]!
+      dump(userId: String!): [SemanticIdea!]!
     }
 
     type Mutation {
       insertIdea(input: SemanticIdeaInput!): Boolean
       tick: Boolean
-      reinforce(id: String!, factor: Float): Boolean
-      restore(snapshot: [SemanticIdeaInput!]!): Boolean
+      reinforce(id: String!, userId: String!, factor: Float): Boolean
+      restore(userId: String!, snapshot: [SemanticIdeaInput!]!): Boolean
       save: Boolean
       load: Boolean
     }
@@ -88,10 +90,10 @@ export function createSchema(store: EidosStore) {
 
   const root = {
     JSON: JSONScalar,
-    ideas: async ({ w, c, context, tags, metadata }: any) => {
-      return store.query(w, c, { context, tags, metadata });
+    ideas: async ({ w, c, userId, context, tags, metadata }: any) => {
+      return store.query(w, { userId, context, tags, metadata }, c);
     },
-    dump: async () => store.snapshot(),
+    dump: async ({ userId }: { userId: string }) => store.snapshot(userId),
     insertIdea: async ({ input }: { input: SemanticIdea }) => {
       await store.insert(input);
       return true;
@@ -100,12 +102,12 @@ export function createSchema(store: EidosStore) {
       await store.tick();
       return true;
     },
-    reinforce: async ({ id, factor }: { id: string; factor?: number }) => {
-      await store.reinforce(id, factor);
+    reinforce: async ({ id, userId, factor }: { id: string; userId: string; factor?: number }) => {
+      await store.reinforce(userId, id, factor);
       return true;
     },
-    restore: async ({ snapshot }: { snapshot: SemanticIdea[] }) => {
-      await store.restore(snapshot);
+    restore: async ({ userId, snapshot }: { userId: string; snapshot: SemanticIdea[] }) => {
+      await store.restore(snapshot, userId);
       return true;
     },
     save: async () => {

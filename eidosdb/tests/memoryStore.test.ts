@@ -12,6 +12,7 @@ function createIdea(id: string, w: number, r: number = 1): SemanticIdea {
     w,
     r,
     context: 'teste',
+    userId: 'u1',
   };
 }
 
@@ -23,7 +24,7 @@ test('insere e consulta ideias ordenadas por v', async () => {
   await store.insert(createIdea('a', 0.002, 1));
   await store.insert(createIdea('b', 0.004, 2));
 
-  const result = await store.query(0.003);
+  const result = await store.query(0.003, { userId: 'u1' });
   expect(result.map((i) => i.id)).toEqual(['b', 'a']);
 });
 
@@ -35,7 +36,7 @@ test('aplica decaimento com tick', async () => {
   const idea = createIdea('a', 1);
   await store.insert(idea);
   await store.tick();
-  const result = await store.query(0.5);
+  const result = await store.query(0.5, { userId: 'u1' });
   expect(result[0].w).toBeCloseTo(idea.w * 0.95);
 });
 
@@ -45,8 +46,8 @@ test('aplica decaimento com tick', async () => {
 test('reforca ideia especifica', async () => {
   const store = new MemoryStore();
   await store.insert(createIdea('a', 1));
-  await store.reinforce('a', 2);
-  const result = await store.query(0.5);
+  await store.reinforce('u1', 'a', 2);
+  const result = await store.query(0.5, { userId: 'u1' });
   expect(result[0].w).toBe(2);
 });
 
@@ -62,11 +63,12 @@ test('remove ideias expiradas', async () => {
     w: 1,
     r: 1,
     context: 'teste',
+    userId: 'u1',
     timestamp: Date.now() - 1000,
     ttl: 10,
   };
   await store.insert(expired);
   await store.tick();
-  const result = await store.query(0.5);
+  const result = await store.query(0.5, { userId: 'u1' });
   expect(result.length).toBe(0);
 });
