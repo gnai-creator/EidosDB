@@ -89,15 +89,12 @@ app.post("/api/keys", async (req: Request, res: Response) => {
   }
   const tier = typeof req.body?.tier === "string" ? req.body.tier : "free";
   const novaChave = crypto.randomBytes(16).toString("hex");
-  if (supabaseAdmin) {
-    const { error } = await supabaseAdmin
-      .from("api_keys")
-      .insert({ user_id: user, key: novaChave, tier });
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-  } else {
-    adicionarChave(user, novaChave, tier);
+  try {
+    await adicionarChave(user, novaChave, tier);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: (err as Error).message });
   }
   res.status(201).json({ key: novaChave });
 });
@@ -128,16 +125,16 @@ app.get("/api/keys", async (req: Request, res: Response) => {
 });
 
 // Middleware de autenticação por chave de API
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   const chave = req.header("x-api-key");
-  const tier = chave ? obterTier(chave) : undefined;
+  const tier = chave ? await obterTier(chave) : undefined;
   if (!tier) {
     return res.status(401).send("Chave de API ausente ou inválida");
   }
   // Armazena informações para uso posterior
   (req as any).tier = tier;
   (req as any).apiKey = chave;
-  (req as any).userId = chave ? obterUsuarioDaChave(chave) : undefined;
+  (req as any).userId = chave ? await obterUsuarioDaChave(chave) : undefined;
   next();
 });
 
@@ -314,10 +311,10 @@ const server = createServer(app);
 // Servidor WebSocket para reforço baseado em fluxo
 // Clientes enviam mensagens JSON `{ id: string, factor?: number }`
 const wss = new WebSocketServer({ server, path: "/reinforce-stream" });
-wss.on("connection", (socket: WebSocket, request) => {
+wss.on("connection", async (socket: WebSocket, request) => {
   const chave = request.headers["x-api-key"] as string | undefined;
-  const tier = chave ? obterTier(chave) : undefined;
-  const userId = chave ? obterUsuarioDaChave(chave) : undefined;
+  const tier = chave ? await obterTier(chave) : undefined;
+  const userId = chave ? await obterUsuarioDaChave(chave) : undefined;
   if (!tier || !userId) {
     socket.close();
     return;
@@ -348,10 +345,10 @@ wss.on("connection", (socket: WebSocket, request) => {
 
 // Servidor WebSocket para envio contínuo de métricas simbólicas
 const metricsWss = new WebSocketServer({ server, path: "/metrics-stream" });
-metricsWss.on("connection", (socket: WebSocket, request) => {
+metricsWss.on("connection", async (socket: WebSocket, request) => {
   const chave = request.headers["x-api-key"] as string | undefined;
-  const tier = chave ? obterTier(chave) : undefined;
-  const userId = chave ? obterUsuarioDaChave(chave) : undefined;
+  const tier = chave ? await obterTier(chave) : undefined;
+  const userId = chave ? await obterUsuarioDaChave(chave) : undefined;
   if (!tier || !userId) {
     socket.close();
     return;

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Carrega as chaves de API e seus tiers a partir de um arquivo JSON.
@@ -10,6 +11,13 @@ const caminho = path.join(__dirname, '..', '..', 'data', 'api-keys.json');
 type ChavesPorIdentificador = Record<string, Record<string, string>>;
 let chaves: ChavesPorIdentificador = {};
 
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null;
+
 try {
   const conteudo = fs.readFileSync(caminho, 'utf-8');
   chaves = JSON.parse(conteudo);
@@ -18,7 +26,18 @@ try {
 }
 
 /** Retorna o tier associado à chave de API fornecida. */
-export function obterTier(chave: string): string | undefined {
+export async function obterTier(
+  chave: string
+): Promise<string | undefined> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('api_keys')
+      .select('tier')
+      .eq('key', chave)
+      .maybeSingle();
+    if (error || !data) return undefined;
+    return data.tier as string;
+  }
   for (const userKeys of Object.values(chaves)) {
     if (chave in userKeys) {
       return userKeys[chave];
@@ -28,7 +47,18 @@ export function obterTier(chave: string): string | undefined {
 }
 
 /** Retorna o identificador do usuário associado à chave. */
-export function obterUsuarioDaChave(chave: string): string | undefined {
+export async function obterUsuarioDaChave(
+  chave: string
+): Promise<string | undefined> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('api_keys')
+      .select('user_id')
+      .eq('key', chave)
+      .maybeSingle();
+    if (error || !data) return undefined;
+    return data.user_id as string;
+  }
   for (const [usuario, userKeys] of Object.entries(chaves)) {
     if (chave in userKeys) {
       return usuario;
@@ -37,12 +67,20 @@ export function obterUsuarioDaChave(chave: string): string | undefined {
   return undefined;
 }
 
-/** Adiciona uma nova chave de API para um identificador de usuário e persiste no arquivo. */
-export function adicionarChave(
+/** Adiciona uma nova chave de API para um identificador de usuário e persiste. */
+export async function adicionarChave(
   usuario: string,
   chave: string,
   tier: string
-): void {
+): Promise<void> {
+  if (supabaseAdmin) {
+    const { error } = await supabaseAdmin
+      .from('api_keys')
+      .insert({ user_id: usuario, key: chave, tier });
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
   if (!chaves[usuario]) chaves[usuario] = {};
   chaves[usuario][chave] = tier;
   fs.writeFileSync(caminho, JSON.stringify(chaves, null, 2));
