@@ -1,36 +1,41 @@
-# Imagem base com Node.js
-FROM node:20-alpine
+FROM node:20-bullseye-slim
 
-# Definir diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# Variáveis de ambiente necessárias para o EidosDB
 ENV EIDOS_ACCEPT_LICENSE=true
+ENV EIDOS_STORAGE=redis
 
-# Copiar arquivos de dependências para otimizar o cache de build
 COPY eidosdb/package*.json ./
 
-# Pacotes necessários para build do canvas
-RUN apk add --no-cache \
-    g++ \
-    make \
-    python3 \
-    cairo-dev \
-    pango-dev \
-    jpeg-dev \
-    giflib-dev
+# Instalar pacotes de sistema necessários, incluindo certificados e wget
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      wget \
+      build-essential \
+      python3 \
+      libcairo2-dev \
+      libpango1.0-dev \
+      libjpeg-dev \
+      libgif-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# glibc compatibility for onnxruntime
-RUN apk add --no-cache gcompat
-
-# Instalar dependências sem pacotes de desenvolvimento
 RUN npm ci --omit=dev
 
-# Copiar o restante do código da aplicação
+# Baixe o modelo ONNX
+RUN mkdir -p /app/models/Xenova/all-MiniLM-L6-v2 && \
+    wget -q -P /app/models/Xenova/all-MiniLM-L6-v2 \
+      https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/tokenizer.json && \
+    wget -q -P /app/models/Xenova/all-MiniLM-L6-v2 \
+      https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/vocab.txt && \
+    # repita para os outros arquivos necessários...
+    mkdir -p /app/models/Xenova/all-MiniLM-L6-v2/onnx && \
+    wget -q -O /app/models/Xenova/all-MiniLM-L6-v2/onnx/model.onnx \
+      https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx
+
+
 COPY eidosdb/ .
 
-# Expor a porta utilizada pela API
 EXPOSE 3000
 
-# Comando padrão para iniciar o servidor
 CMD ["npm", "run", "start:api"]

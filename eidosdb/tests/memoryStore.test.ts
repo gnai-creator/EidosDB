@@ -1,6 +1,13 @@
 import { MemoryStore } from '../src/storage/memoryStore';
 import type { SemanticIdea } from '../src/core/symbolicTypes';
 
+jest.mock('../src/semantic/embedding', () => ({
+  generateEmbedding: jest.fn(async (text: string) => {
+    if (text === 'q') return [1, 0];
+    return [0, 1];
+  }),
+}));
+
 /**
  * Cria uma ideia simbólica básica para os testes.
  */
@@ -71,4 +78,33 @@ test('remove ideias expiradas', async () => {
   await store.tick();
   const result = await store.query(0.5, { userId: 'u1' });
   expect(result.length).toBe(0);
+});
+
+/**
+ * Verifica busca por similaridade de cosseno.
+ */
+test('recupera ideias por similaridade', async () => {
+  const store = new MemoryStore();
+  const ideaA: SemanticIdea = {
+    id: 'a',
+    label: 'a',
+    vector: [1, 0],
+    w: 1,
+    r: 1,
+    context: 't',
+    userId: 'u1',
+  };
+  const ideaB: SemanticIdea = {
+    id: 'b',
+    label: 'b',
+    vector: [0, 1],
+    w: 1,
+    r: 1,
+    context: 't',
+    userId: 'u1',
+  };
+  await store.insert(ideaA);
+  await store.insert(ideaB);
+  const result = await store.retrieveBySimilarity('u1', 'q', 2);
+  expect(result.map((i) => i.id)).toEqual(['a', 'b']);
 });

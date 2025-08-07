@@ -5,6 +5,8 @@ import type { SemanticIdea, QuerySelectors } from "../core/symbolicTypes";
 import { calculateV, DEFAULT_C } from "../core/formula";
 import { saveToDisk, loadFromDisk } from "./persistence";
 import type { StorageAdapter } from "./storageAdapter";
+import { generateEmbedding } from "../semantic/embedding";
+import { cosineSimilarity } from "../semantic/similarity";
 
 /**
  * Armazenamento simbólico utilizando SQLite.
@@ -95,6 +97,28 @@ export class SQLiteStore implements StorageAdapter {
         v: calculateV(w, idea.r, c),
       }))
       .sort((a, b) => b.v - a.v);
+  }
+
+  /**
+   * Recupera ideias ordenadas por similaridade de cosseno com um texto.
+   */
+  async retrieveBySimilarity(
+    userId: string,
+    queryText: string,
+    maxResults: number,
+  ): Promise<SemanticIdea[]> {
+    this.cleanupExpired();
+    const ideas = await this.snapshot(userId);
+    if (ideas.length === 0) return [];
+    const queryVector = await generateEmbedding(queryText);
+    return ideas
+      .map((idea) => ({
+        idea,
+        sim: cosineSimilarity(queryVector, idea.vector),
+      }))
+      .sort((a, b) => b.sim - a.sim)
+      .slice(0, maxResults)
+      .map((entry) => entry.idea);
   }
 
   /**

@@ -16,6 +16,7 @@ import { setupGraphQL } from "./graphqlAdapter"; // Adapta REST para GraphQL
 import { validarLicenca } from "../utils/license";
 import crypto from "crypto";
 import { generateEmbedding } from "../semantic/embedding";
+import { summarizeIdea } from "../semantic/summarizeIdea";
 import {
   obterTier,
   obterUsuarioDaChave,
@@ -34,7 +35,7 @@ const storageType = process.env.EIDOS_STORAGE || "memory";
 let adapter: StorageAdapter;
 switch (storageType) {
   case "redis":
-    adapter = new RedisStore();
+    adapter = new RedisStore(process.env.REDIS_URL);
     break;
   case "sqlite":
     adapter = new SQLiteStore();
@@ -186,29 +187,53 @@ app.get("/query", async (req: Request, res: Response) => {
   res.json(result);
 });
 
-// Inserção de novo ponto
-// Permite campo opcional `ttl` (ms) para expirar automaticamente a ideia
-app.post("/insert", async (req: Request<{}, {}, SemanticIdea>, res: Response) => {
-  const data = req.body;
-  if (!data.id || typeof data.w !== "number" || typeof data.r !== "number") {
-    return res.status(400).send("Invalid DataPoint format");
+// Busca semântica por similaridade e retorna resumos das ideias
+app.post("/semantic-context", async (req: Request, res: Response) => {
+  const { text, maxResults } = req.body ?? {};
+  if (typeof text !== "string" || text.length === 0) {
+    return res.status(400).send("Missing 'text'");
   }
-
   const userId = (req as any).userId as string;
   if (!userId) return res.status(401).send("User not resolved");
-  data.userId = userId;
-  if (!data.vector || data.vector.length === 0) {
-    try {
-      data.vector = await generateEmbedding(data.label);
-    } catch (err) {
-      console.error("Embedding generation failed", err);
-      return res.status(500).send("Embedding generation failed");
-    }
+  try {
+    const ideas = await store.retrieveBySimilarity(
+      userId,
+      text,
+      typeof maxResults === "number" ? maxResults : 5,
+    );
+    const summaries = ideas.map(summarizeIdea);
+    res.json(summaries);
+  } catch (err) {
+    res.status(500).send("Similarity retrieval failed");
   }
-  await store.insert(data);
-  await logSymbolicMetrics(store, userId);
-  res.sendStatus(201);
 });
+
+// Inserção de novo ponto
+// Permite campo opcional `ttl` (ms) para expirar automaticamente a ideia
+app.post(
+  "/insert",
+  async (req: Request<{}, {}, SemanticIdea>, res: Response) => {
+    const data = req.body;
+    if (!data.id || typeof data.w !== "number" || typeof data.r !== "number") {
+      return res.status(400).send("Invalid DataPoint format");
+    }
+
+    const userId = (req as any).userId as string;
+    if (!userId) return res.status(401).send("User not resolved");
+    data.userId = userId;
+    if (!data.vector || data.vector.length === 0) {
+      try {
+        data.vector = await generateEmbedding(data.label);
+      } catch (err) {
+        console.error("Embedding generation failed", err);
+        return res.status(500).send("Embedding generation failed");
+      }
+    }
+    await store.insert(data);
+    await logSymbolicMetrics(store, userId);
+    res.sendStatus(201);
+  }
+);
 
 // Tick de decaimento
 app.post("/tick", async (req: Request, res: Response) => {
@@ -285,7 +310,11 @@ wss.on("connection", (socket: WebSocket, request) => {
         return;
       }
       // Aplicar reforço usando fator fornecido ou padrão
-      await store.reinforce(userId, id, typeof factor === "number" ? factor : 1.1);
+      await store.reinforce(
+        userId,
+        id,
+        typeof factor === "number" ? factor : 1.1
+      );
       socket.send(JSON.stringify({ status: "ok" }));
     } catch (err) {
       // Notificar o cliente sobre cargas malformadas ou erros internos

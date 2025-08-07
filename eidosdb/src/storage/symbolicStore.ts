@@ -22,6 +22,14 @@ export class EidosStore {
     return this.adapter.query(w, selectors, c);
   }
 
+  retrieveBySimilarity(
+    userId: string,
+    queryText: string,
+    maxResults: number,
+  ): Promise<SemanticIdea[]> {
+    return this.adapter.retrieveBySimilarity(userId, queryText, maxResults);
+  }
+
   tick(): Promise<void> {
     return this.adapter.tick();
   }

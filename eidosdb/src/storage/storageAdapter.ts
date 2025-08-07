@@ -12,6 +12,11 @@ export interface StorageAdapter {
     selectors: QuerySelectors,
     c?: number
   ): Promise<(SemanticIdea & { v: number })[]>;
+  retrieveBySimilarity(
+    userId: string,
+    queryText: string,
+    maxResults: number,
+  ): Promise<SemanticIdea[]>;
   tick(): Promise<void>;
   reinforce(userId: string, id: string, factor?: number): Promise<void>;
   save(filePath?: string): Promise<void>;
