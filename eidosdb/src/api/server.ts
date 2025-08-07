@@ -89,7 +89,16 @@ app.post("/api/keys", async (req: Request, res: Response) => {
   }
   const tier = typeof req.body?.tier === "string" ? req.body.tier : "free";
   const novaChave = crypto.randomBytes(16).toString("hex");
-  adicionarChave(user, novaChave, tier);
+  if (supabaseAdmin) {
+    const { error } = await supabaseAdmin
+      .from("api_keys")
+      .insert({ user_id: user, key: novaChave, tier });
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  } else {
+    adicionarChave(user, novaChave, tier);
+  }
   res.status(201).json({ key: novaChave });
 });
 
@@ -103,7 +112,19 @@ app.get("/api/keys", async (req: Request, res: Response) => {
   if (!user) {
     return res.status(401).send("Token inválido");
   }
-  res.json(listarChaves(user));
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from("api_keys")
+      .select("id, key, tier, revoked, usage_count, created_at")
+      .eq("user_id", user)
+      .order("created_at", { ascending: false });
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data || []);
+  } else {
+    res.json(listarChaves(user));
+  }
 });
 
 // Middleware de autenticação por chave de API
